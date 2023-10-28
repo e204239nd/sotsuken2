@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- cssを読み込む -->
+    <link rel="stylesheet" href="style.css" />
+    <title>moveableの実験</title>
+    <style>
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 50vh;
+        margin: 0;
+      }
+
+      #title {
+        font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+          sans-serif;
+        text-align: center;
+      }
+
+      .root {
+        background-color: #ddd;
+        width: 200px;
+        height: 200px;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js"></script>
+  </head>
+
+  <body>
+    <svg id="svg" width="800" height="600">
+      <g id="selectMenu">
+
+
+        <foreignObject id="rect" x="120" y="0" width="100" height="100"></foreignObject>
+      </g>
+    </svg>
+    <!--jsファイルを読み込む-->
+
+    <!--moveableを読み込む-->
+    <script src="//daybrush.com/moveable/release/latest/dist/moveable.min.js"></script>
+    <script>
+      const s = Snap("#svg");
+      const svg = document.querySelector("#svg");
+ 
+      let totalDragging = 0;
+      
+        const move = new Moveable(document.body, {
+          target: document.getElementById(childElems[i].id),
+          draggable: true,
+          resizable: true,
+        });
+
+        //追記
+        move.on("drag", (e) => {
+          // マウスの位置に座標を動かす
+          const x =
+            Number(e.target.getAttribute("x")) + e.delta[0] ||
+            Number(e.target.getAttribute("cx")) + e.delta[0];
+          const y =
+            Number(e.target.getAttribute("y")) + e.delta[1] ||
+            Number(e.target.getAttribute("cy")) + e.delta[1];
+          e.target.setAttribute("x", x) || e.target.setAttribute("cx", x);
+          e.target.setAttribute("y", y) || e.target.setAttribute("cy", y);
+        });
+        // move.on("dragEnd",(e)=> {
+        //   e.target.style.transform="";
+        //   console.log(e.dist);
+        //   e.target.x += Number(e.target.x)+e.dist[0];
+        //   e.target.y += Number(e.target.y)+e.dist[1];
+        // });
+
+        //追記
+        move.on("resize", (e) => {
+          const x =
+            Number(e.target.getAttribute("x")) + e.delta[0] ||
+            Number(e.target.getAttribute("cx")) + e.delta[0];
+          const y =
+            Number(e.target.getAttribute("y")) + e.delta[1] ||
+            Number(e.target.getAttribute("cy")) + e.delta[1];
+            
+          if(x<0 || y<0) {
+            e.target.transform=`translate(${x},${y})`;
+          // e.target.setAttribute("x", x) || e.target.setAttribute("cx", x);
+          // e.target.setAttribute("y", y) || e.target.setAttribute("cy", y);
+console.log(e.target.setAttribute("x", x) || e.target.setAttribute("cx", x)
+          +" "+ e.target.setAttribute("y", y) || e.target.setAttribute("cy", y));
+          
+          }
+          console.log(x+" "+y);
+          // if (e.dist[0] < 0) {
+          //   e.target.style.x -= Math.abs(e.dist[0]);
+          //   e.target.style.y -= Math.abs(e.dist[1]);
+          // }
+
+          const a_dx = Math.abs(e.dist[0]);
+          const a_dy = Math.abs(e.dist[1]);
+          e.target.style.width = a_dx;
+          e.target.style.height = a_dy;
+          totalDragging += a_dx;
+          totalDragging += a_dy;
+        });
+      }
+    </script>
+  </body>
+</html>

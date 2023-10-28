@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js"></script>
+    <title>図形のグループ化</title>
+  </head>
+  <body contextmenu="false">
+    <svg
+      xlns="http://www.w3.org/2000/svg"
+      width="1500px"
+      height="1500px"
+      id="svg-container"
+    >
+    
+      <defs>
+        <!-- グループ化された要素の枠
+           選択状態のときのみ表示される -->
+        <g id="group_frame">
+          <rect
+            style="
+              opacity: 0;
+              fill: aliceblue;
+              stroke: #000000;
+              stroke-width: 0;
+            "
+            id="rect281"
+            width="150"
+            height="200"
+            x="0"
+            y="0"
+          />
+        </g>
+      </defs>
+      <!-- ホワイトボード上の図形には番号が割り振られている。
+        割り振られている番号が選択状態であるかを表現している配列があり、「0:未選択 1:選択」という状態を持っている。
+        シフトを押しながらクリックすれば、図形に割り振られている番号に対応した配列の要素が1に置き換わることでグループ化可能な状態に変更するためのプログラムを作成する。 -->
+      <g>
+        <use x="0" y="0" xlink:href="#group_frame" style="fill:#c00;"/>
+        <foreignObject
+          class="contentBox"
+          y="50"
+          id="0"
+          width="150"
+          height="150"
+        >
+          <div style="background-color: green">要素１</div>
+        </foreignObject>
+        <foreignObject
+          class="contentBox"
+          id="1"
+          x="0"
+          y="200"
+          width="150"
+          height="150"
+        >
+          <div style="background-color: green">要素２</div>
+        </foreignObject>
+      </g>
+    </svg>
+    <script src="js/main.js"></script>
+  </body>
+</html>
