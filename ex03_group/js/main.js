@@ -26,10 +26,11 @@ function clickEventHundler() {
       if (e.shiftKey && !IsClickArray.includes(contentBox.id)) {
         const num = contentBox.id;
         IsClickArray.push(num);
-        debugFunc(IsClickArray);
+        debugFunc("shift + 左クリック");
       }
     });
     displayContextMenu(contentBox);
+    
   });
 
   // 任意のアクションを追加
@@ -71,7 +72,9 @@ function displayContextMenu(contentBox) {
     contextMenu.addEventListener("click", (e) => {
       const paper = Snap("#svg-container");
       const group = paper.g();
-      //IsClickArrayに追加したIDの要素をグループに追加する
+      
+
+      //選択した図形をグループに追加する
       for (let i = 0; i < IsClickArray.length; i++) {
         // グループの属性を設定
         group.attr({
@@ -80,22 +83,33 @@ function displayContextMenu(contentBox) {
           strokeWidth: 2,
           class: "groupObj",
         });
-        debugFunc("#" + IsClickArray[i]);
+
         const targetObj = document.getElementById(IsClickArray[i]);
         const svgObject = Snap(targetObj);
+        //グループに追加
         group.add(svgObject);
       }
-      const targetObj = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "rect"
-      );
 
-      setAttributes(targetObj, { x: px, y: py });
-      const svgObject = Snap(targetObj);
-      group.add(svgObject);
+      //グループ化した図形を枠で囲む
+      const rect = paper.rect(0, 30, 150, 250);
+      rect.attr({ class: "group_frame", opacity: 0.8, fill: "aliceblue" });
+
+      //クリックしたときに選択状態の切り替え
+      rect.mouseup(() => {
+        if (Number(rect.attr("opacity")) > 0) {
+          rect.attr("opacity", 0);
+        } else {
+          rect.attr("opacity", 0.8);
+        }
+      });
+      group.add(rect);
+
+      
+      contextMenu.parentNode.removeChild(contextMenu); //コンテキストメニューを閉じる
+      group.drag();  
+      debugFunc(IsClickArray);
       //配列を初期化
       IsClickArray = [];
-      contextMenu.parentNode.removeChild(contextMenu); //コンテキストメニューを閉じる
     });
   });
 }

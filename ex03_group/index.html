@@ -17,7 +17,28 @@
       <defs>
         <!-- グループ化された要素の枠
            選択状態のときのみ表示される -->
-        <g id="group_frame">
+           <g id="group_frame">
+            <rect
+              style="
+                opacity: 0;
+                fill: aliceblue;
+                stroke: #000000;
+                stroke-width: 0;
+              "
+              id="rect281"
+              width="150"
+              height="200"
+              x="0"
+              y="0"
+            />
+          </g>
+      </defs>
+      <!-- ホワイトボード上の図形には番号が割り振られている。
+        割り振られている番号が選択状態であるかを表現している配列があり、「0:未選択 1:選択」という状態を持っている。
+        シフトを押しながらクリックすれば、図形に割り振られている番号に対応した配列の要素が1に置き換わることでグループ化可能な状態に変更するためのプログラムを作成する。 -->
+      
+        <!-- グループ化された図形の枠 -->
+        <!-- <g id="group_frame">
           <rect
             style="
               opacity: 0;
@@ -31,17 +52,12 @@
             x="0"
             y="0"
           />
-        </g>
-      </defs>
-      <!-- ホワイトボード上の図形には番号が割り振られている。
-        割り振られている番号が選択状態であるかを表現している配列があり、「0:未選択 1:選択」という状態を持っている。
-        シフトを押しながらクリックすれば、図形に割り振られている番号に対応した配列の要素が1に置き換わることでグループ化可能な状態に変更するためのプログラムを作成する。 -->
-      <g>
-        <use x="0" y="0" xlink:href="#group_frame" style="fill:#c00;"/>
+        </g> -->
+
         <foreignObject
           class="contentBox"
           y="50"
-          id="0"
+          id="element1"
           width="150"
           height="150"
         >
@@ -49,7 +65,7 @@
         </foreignObject>
         <foreignObject
           class="contentBox"
-          id="1"
+          id="element2"
           x="0"
           y="200"
           width="150"
@@ -57,7 +73,6 @@
         >
           <div style="background-color: green">要素２</div>
         </foreignObject>
-      </g>
     </svg>
     <script src="js/main.js"></script>
   </body>
