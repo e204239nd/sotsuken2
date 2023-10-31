@@ -6,7 +6,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js"></script>
     <title>図形のグループ化</title>
   </head>
-  <body contextmenu="false">
+  <body contextmenu="return false">
     <svg
       xlns="http://www.w3.org/2000/svg"
       width="1500px"
@@ -40,7 +40,7 @@
         <!-- グループ化された図形の枠 -->
         <!-- <g id="group_frame">
           <rect
-            style="
+            sty le="
               opacity: 0;
               fill: aliceblue;
               stroke: #000000;
@@ -58,20 +58,20 @@
           class="contentBox"
           y="50"
           id="element1"
-          width="150"
-          height="150"
+          width="80"
+          height="80"
         >
-          <div style="background-color: green">要素１</div>
+          <div style="width:100%;height:100%;background-color: green">要素１</div>
         </foreignObject>
         <foreignObject
           class="contentBox"
           id="element2"
           x="0"
           y="200"
-          width="150"
-          height="150"
+          width="80"
+          height="80"
         >
-          <div style="background-color: green">要素２</div>
+          <div style="width:100%;height:100%;background-color: green">要素２</div>
         </foreignObject>
     </svg>
     <script src="js/main.js"></script>

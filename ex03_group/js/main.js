@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", function () {
   //クリック状態を初期化
   IsClickArray = [];
   clickEventHundler();
+  // const svg = document.querySelector("#svg-container");
+  // svg.addEventListener("click", (e) => (IsClickArray = []));
 });
 
 function clickEventHundler() {
@@ -30,7 +32,6 @@ function clickEventHundler() {
       }
     });
     displayContextMenu(contentBox);
-    
   });
 
   // 任意のアクションを追加
@@ -42,6 +43,9 @@ function clickEventHundler() {
 function displayContextMenu(contentBox) {
   //右クリック時の処理
   contentBox.addEventListener("contextmenu", (e) => {
+    if (IsClickArray.length <= 1) {
+      return;
+    }
     // グループ化した図形の枠の要素を取得
     const clientRect = contentBox.getBoundingClientRect();
 
@@ -72,8 +76,25 @@ function displayContextMenu(contentBox) {
     contextMenu.addEventListener("click", (e) => {
       const paper = Snap("#svg-container");
       const group = paper.g();
-      
+//グループ化した図形を枠で囲む
+const rect = paper.rect(0, 30, 150, 250);
+rect.attr({
+  class: "group_frame",
+  opacity: 0,
+  fill: "white",
+  strokeWidth: 1,
+  stroke: "black",
+});
 
+//クリックしたときに選択状態の切り替え
+/*    rect.click(() => {
+  if (Number(rect.attr("opacity")) > 0) {
+    rect.attr("opacity", 0);
+  } else {
+    rect.attr("opacity", 0.8);
+  }
+}); */
+group.add(rect);
       //選択した図形をグループに追加する
       for (let i = 0; i < IsClickArray.length; i++) {
         // グループの属性を設定
@@ -90,23 +111,10 @@ function displayContextMenu(contentBox) {
         group.add(svgObject);
       }
 
-      //グループ化した図形を枠で囲む
-      const rect = paper.rect(0, 30, 150, 250);
-      rect.attr({ class: "group_frame", opacity: 0.8, fill: "aliceblue" });
-
-      //クリックしたときに選択状態の切り替え
-      rect.mouseup(() => {
-        if (Number(rect.attr("opacity")) > 0) {
-          rect.attr("opacity", 0);
-        } else {
-          rect.attr("opacity", 0.8);
-        }
-      });
-      group.add(rect);
-
       
+
       contextMenu.parentNode.removeChild(contextMenu); //コンテキストメニューを閉じる
-      group.drag();  
+      group.drag();
       debugFunc(IsClickArray);
       //配列を初期化
       IsClickArray = [];

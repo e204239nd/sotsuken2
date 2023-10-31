@@ -1,0 +1,58 @@
+body {
+    margin: 0 10px;
+  }
+  
+  foreignObject {
+    position: absolute;
+    background-color: green;
+    padding: 10px;
+    width: 200px;
+    height: 100px;
+  }
+  
+  foreignObject:first-child {
+    position: relative;
+    left: auto;
+    right: auto;
+    padding: 5px;
+    margin: 0;
+  }
+  
+  textarea {
+    background-color: black;
+    color: white;
+    width: 200px;
+    height: 100px;
+    line-height: 70px;
+    font-size: 16px;
+    max-width: 100%;
+    max-height: 100%;
+    padding:0;
+  }
+  
+  .menu {
+    display: flex;
+  }
+  
+  .box {
+    background-color: black;
+    width: 70px;
+    height: 70px;
+    line-height: 70px;
+    text-align: center;
+    color: white;
+    margin-left: 30px;
+  }
+  
+  /* メニューボタン */
+  #textBox_menu {
+    margin: 0;
+    background-color: black;
+    color: white;
+  }
+  
+  #imgBox_menu {
+    background-color: rgb(35, 142, 71);
+    color: white;
+  }
+  
