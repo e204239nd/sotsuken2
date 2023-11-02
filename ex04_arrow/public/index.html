@@ -22,7 +22,8 @@
         background-color: rgba(0, 0, 0, 0);
       "
     >
-    <div id="arrowBtn">
+    
+    <div  id="arrowBtn">
       <svg version="1.1" width="64" height="64" stroke="black">
         <defs>
           <marker
@@ -48,8 +49,20 @@
         xlns="http://www.w3.org/2000/svg"
         width="1000px"
         height="1000px"
-      ></svg>
+      >  <defs>
+        <marker
+          id="m_atr"
+          markerUnits="strokeWidth"
+          markerWidth="10"
+          markerHeight="10"
+          refX="5"
+          refY="5"
+        >
+          <polygon points="0,0 5,5 0,10 10,5 " fill="black" />
+        </marker>
+      </defs></svg>
     <div style="bottom: 0px; position: absolute;" >
+      <p id="debug" style="background:aliceblue"></p>
       <p>ホワイトボードに矢印を表示するプログラム<br>
       <ul>
         <li>マウスを押すと線が表示される</li>

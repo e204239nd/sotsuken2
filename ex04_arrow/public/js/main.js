@@ -1,3 +1,4 @@
+/*
 //ページ読込み時の処理
 document.addEventListener("DOMContentLoaded", function () {
   const whiteboadId = localStorage.getItem("whiteboad_id");
@@ -63,3 +64,4 @@ const readHunder = async (e) => {
     });
 };
 form2.addEventListener("submit", readHunder);
+*/

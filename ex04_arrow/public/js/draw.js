@@ -7,9 +7,9 @@ const updateBtn = document.getElementById("update");
 //テキストボックスメニューがドラッグされているとき
 //  draggableで要素のドラッグを可能にしないとdragイベントが使えない
 // textBox_menu.addEventListener("dragend", displayToTextbox);
-imgBox_menu.addEventListener("dragend", displayToImgbox);
+// imgBox_menu.addEventListener("dragend", displayToImgbox);
 
-
+/*
 //テキストボックスを表示する
 function displayToTextbox(e) {
   console.log(e);
@@ -100,6 +100,7 @@ function displayToImgbox(e) {
 
   count++;
 }
+*/
 
 //要素の属性を一括で設定する
 function setAttributes(element, attributes) {

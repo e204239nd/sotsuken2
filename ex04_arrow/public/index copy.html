@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js"></script>
+  </head>
+  <body>
+    <svg width="1000" height="400" id="svg"></svg>
+    <p id="debug"></p>
+    <script>
+      // Snap.svgのインスタンスを作成
+      var s = Snap("#svg");
+
+      var moveFlag = false;
+      var line;
+      let tmpX, tmpY;
+      // マウスダウンイベント
+      s.mousedown(function (e) {
+        moveFlag = true;
+        tmpX = e.offsetX;
+        tmpY = e.offsetY;
+        line = s.path("M " + e.offsetX + " " + e.offsetY);
+        s.attr({stroke:"red",strokeWeight:1})
+        debugFunc("マウスダウン");
+      });
+
+      // マウスムーブイベント
+      s.mousemove(function (e) {
+        if (moveFlag) {
+          var d = "M " + tmpX + " " + tmpY + " L " + e.offsetX + " " + e.offsetY;
+          line.attr({ d: d });
+        }
+        debugFunc("マウスムーブ");
+      });
+
+      // マウスアップイベント
+      s.mouseup(function () {
+        moveFlag = false;
+        debugFunc("マウスアップ");
+      });
+
+      function debugFunc(str) {
+        const debugTxt = document.querySelector("#debug");
+        if (debugTxt) {
+          debugTxt.textContent = str;
+          return;
+        }
+      }
+    </script>
+  </body>
+</html>
