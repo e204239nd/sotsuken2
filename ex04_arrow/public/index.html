@@ -33,11 +33,13 @@
             markerHeight="10"
             refX="5"
             refY="5"
+            orient="auto"
           >
             <polygon points="0,0 5,5 0,10 10,5 " fill="black" />
           </marker>
+          
         </defs>
-        <path d="M 0 10 L 20 10" marker-end="url(#m_atr)"></path>
+        <path d="M 0 10 L 20 10" xlink:href="#m_atr" position = "50%"></path>
       </svg>
     </div>
     </div>
@@ -61,7 +63,7 @@
           <polygon points="0,0 5,5 0,10 10,5 " fill="black" />
         </marker>
       </defs></svg>
-    <div style="bottom: 0px; position: absolute;" >
+  <!--   <div style="bottom: 0px; position: absolute;" >
       <p id="debug" style="background:aliceblue"></p>
       <p>ホワイトボードに矢印を表示するプログラム<br>
       <ul>
@@ -71,7 +73,7 @@
       </ul>  
       </p>
       </div>
-    </div>
+    </div> -->
       <script src="js/arrow.js"></script>
     <script src="js/draw.js"></script>
     <script src="js/main.js"></script>

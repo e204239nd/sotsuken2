@@ -36,7 +36,7 @@ function arrow() {
     py = e.offsetY;
 
     const paper = Snap("#svg-container");
-    arrow_endX = px + 200;
+    arrow_endX = px+1;
     arrow_endY = py;
     segs = [
       ["M", px, py],
@@ -46,9 +46,6 @@ function arrow() {
     //   debugFunc("x:" + px + " y:" + py);
     //矢印の描画
     //11/01 描画はできたが矢印の長さを調節できない。
-    
-
-    
 
     /* arrow.drag(
       function (dx, dy) {
@@ -73,33 +70,34 @@ function arrow() {
       function () {}
     ); */
     var moveFlag = false;
-      var line;
-      let tmpX, tmpY;
-      // マウスダウンイベント
-      paper.mousedown(function (e) {
-        moveFlag = true;
-        tmpX = e.offsetX;
-        tmpY = e.offsetY;
-        line = paper.path("M " + e.offsetX + " " + e.offsetY);
-        paper.attr({stroke:"red",strokeWeight:1,id:"arrow"})
-        debugFunc("マウスダウン");
-      });
+    var arrow;
+    let tmpX, tmpY;
+    // マウスダウンイベント
+    paper.mousedown(function (e) {
+      moveFlag = true;
+      tmpX = e.offsetX;
+      tmpY = e.offsetY;
+      arrow = paper.path("M " + e.offsetX + " " + e.offsetY);
+      paper.attr({ stroke: "black", strokeWeight: 1, id: "arrow" });
+      // debugFunc("マウスダウン");
+    });
 
-      // マウスムーブイベント
-      paper.mousemove(function (e) {
-        if (moveFlag) {
-          var d = "M " + tmpX + " " + tmpY + " L " + e.offsetX + " " + e.offsetY;
-          line.attr({ d: d });
-          document.querySelector("#arrow").setAttribute("marker-end", "url(#m_atr)");
-        }
-        debugFunc("マウスムーブ");
-      });
+    // マウスムーブイベント
+    paper.mousemove(function (e) {
+      if (moveFlag) {
+        var d = "M " + tmpX + " " + tmpY + " L " + e.offsetX + " " + e.offsetY;
+        arrow.attr({ d: d });
+        const arrowElem = document.querySelector("#arrow");
+        arrowElem.setAttribute("marker-end", "url(#m_atr)");
+      }
+      // debugFunc("マウスムーブ");
+    });
 
-      // マウスアップイベント
-      paper.mouseup(function () {
-        moveFlag = false;
-        debugFunc("マウスアップ");
-      });
+    // マウスアップイベント
+    paper.mouseup(function () {
+      moveFlag = false;
+      // debugFunc("マウスアップ");
+    });
 
     /* arrow.drag((dx, dy) => {
       //   arrow.attr({ x: px, y: py });
