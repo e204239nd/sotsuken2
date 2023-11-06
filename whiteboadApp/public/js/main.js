@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-const form1 = document.getElementById("form1");
+/* const form1 = document.getElementById("form1");
 const updateHundler = async (e) => {
   e.preventDefault();
   const svgData = document.getElementById("helo").innerHTML;
@@ -63,3 +63,4 @@ const readHunder = async (e) => {
     });
 };
 form2.addEventListener("submit", readHunder);
+ */

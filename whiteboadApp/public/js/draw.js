@@ -3,10 +3,11 @@ const svg = document.getElementById("svg");
 let count = 0;
 //描画モード切り替え用
 let drawMode = "";
+//編集状態
+let edit = false;
 
 document.addEventListener("DOMContentLoaded", () => {
-  //テキストボックスメニューがドラッグされているとき
-
+  //テキストボックスメニューがドラッグされているとき-
   const imgBox_menu = document.getElementById("imgBox_menu");
   const textBox_menu = document.getElementById("textBox_menu");
   const arrow_menu = document.getElementById("arrow_menu");
@@ -27,23 +28,47 @@ function displayToTextbox(e) {
   const r = svg.getBoundingClientRect();
   const x = Math.round(e.clientX - r.left);
   const y = Math.round(e.clientY - r.top);
-  const textarea = document.createElement("textarea");
+  const div = document.createElement("div");
   setAttributes(foreignObject, {
     id: "contentBox" + count,
+    class: "content",
     x: x,
     y: y,
     width: 100,
     height: 100,
   });
-  textarea.setAttribute("placeholder", "文字を入力してください");
-  foreignObject.appendChild(textarea);
+  div.setAttribute("contenteditable", true);
+  div.textContent = " ";
+  foreignObject.appendChild(div);
   svg.appendChild(foreignObject);
+
+  const mySvg = Snap("#svg");
+  const paper = Snap("#contentBox" + count);
+  paper.drag();
+  //図形以外の領域をクリックすると編集状態をfalseへ
+  mySvg.click(() => {
+    div.style.cursor = "default";
+    edit = false;
+    paper.drag();
+  });
+
+  //クリックされたときに編集状態に変更
+  paper.dblclick(() => {
+    if (!edit) {
+      div.style.cursor = "auto";
+      edit = true;
+      paper.undrag();
+    } else {
+      edit = false;
+      paper.drag();
+    }
+  });
+
   count++;
 }
 
 //画像を挿入するためのボックスを表示する
 function displayToImgbox(e) {
-  
   const foreignObject = document.createElementNS(
     "http://www.w3.org/2000/svg",
     "foreignObject"
@@ -57,9 +82,10 @@ function displayToImgbox(e) {
   <input type="submit"></input>
 </form>`;
 
-  setAttributes(div, { id: "contentBox" });
+  setAttributes(div, { class: "contentBox" });
   setAttributes(foreignObject, {
     id: "contentBox" + count,
+    class: "content",
     x: x,
     y: y,
     width: 100,
@@ -148,8 +174,8 @@ function arrow() {
     // マウスダウンイベント
     paper.mousedown(function (e) {
       if (drawMode != "arrow") {
-      return false;
-    }
+        return false;
+      }
       moveFlag = true;
       tmpX = e.offsetX;
       tmpY = e.offsetY;

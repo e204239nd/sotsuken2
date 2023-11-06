@@ -12,7 +12,7 @@
     <div
       class="menu"
       style="
-        padding-top: 100px;
+        padding-top: 10px;
         padding-left: 100px;
         position: fixed;
         top: 0;
@@ -53,14 +53,22 @@
       <input type="submit" id="read" value="読込み"></input>
     </form>
 <button style="margin-top: 10px;" id="btn">図形表示</button> -->
+<ul>
+  <li>11/05 目標：テキストボックスを改善する</li>
+  <li>1.文章の改行を可能にする</li>
+  <li>2.テキストエリアではなくdivで入力可能にする</li>
+</ul>
 
     <div id="helo">
+     
       <svg
         id="svg"
         xlns="http://www.w3.org/2000/svg"
         width="1000px"
         height="1000px"
       >
+      
+      
         <defs>
           <marker
             id="m_atr"
@@ -74,8 +82,14 @@
             <polygon points="0,0 5,5 0,10 10,5 " fill="black" />
           </marker>
         </defs>
+        <foreignObject id="contentBox3" class="content" x="183" y="83" width="100" height="100" transform="matrix(1,0,0,1,0,301)"><div contenteditable="true" style="cursor: default;"> </div></foreignObject>
+        <foreignObject id="contentBox4" class="content" x="400" y="83" width="100" height="100" transform="matrix(1,0,0,1,0,301)"><div contenteditable="true" style="cursor: default;"> </div></foreignObject>
       </svg>
+ 
+        <p>文章を入力してください</p>
+      </div>
     </div>
+    <script src="js/group.js"></script>
     <script src="js/draw.js"></script>
     <script src="js/main.js"></script>
   </body>
