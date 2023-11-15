@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <title>ホワイトボードの保存</title>
+  </head>
+  <body>
+    <!-- メニュー -->
+    <div
+      class="menu"
+      style="
+        padding-top: 10px;
+        padding-left: 100px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0);
+      "
+    >
+      <!-- テキストボックス -->
+      <div
+        id="textBox_menu"
+        style="margin-left: 50px"
+        class="box"
+        draggable="true"
+      >
+        文章
+      </div>
+      <div
+        id="imgBox_menu"
+        class="box"
+        draggable="true"
+        style="margin-right: 0px"
+      >
+        画像
+      </div>
+
+      <div id="arrow_menu" id="imgBox_menu" class="box" draggable="true">
+        矢印
+      </div>
+    </div>
+
+
+
+
+
+    
+    <!--　保存読み込みボタン
+       <form id="form1" style="margin:10px 0">
+      <input type="submit" id="update" value="保存"></input>
+    </form>
+    <form id="form2">
+      <input type="submit" id="read" value="読込み"></input>
+    </form>
+<button style="margin-top: 10px;" id="btn">図形表示</button> -->
+<ul>
+  <li>11/05 目標：テキストボックスを改善する</li>
+  <li>1.文章の改行を可能にする</li>
+  <li>2.テキストエリアではなくdivで入力可能にする</li>
+</ul>
+
+    <div id="helo">
+     
+      <svg
+        id="svg"
+        xlns="http://www.w3.org/2000/svg"
+        width="1000px"
+        height="1000px"
+      >
+      
+      
+        <defs>
+          <marker
+            id="m_atr"
+            markerUnits="strokeWidth"
+            markerWidth="10"
+            markerHeight="10"
+            refX="5"
+            refY="5"
+            orient="auto"
+          >
+            <polygon points="0,0 5,5 0,10 10,5 " fill="black" />
+          </marker>
+          
+        </defs>
+        
+        <!-- テキストボックスメニュー -->
+        <!-- <foreignObject id="contentBox0" class="content" x="160" y="79" width="100" height="100"><div contenteditable="true"> </div></foreignObject> -->
+
+        <!-- 画像描画メニュー -->
+        <!-- <foreignObject id="contentBox0" class="content" x="188" y="324" width="100" height="100"><div class="contentBox"><form id="form0">
+          <input id="input0" type="file" style="margin-bottom:15px;  accept=" image="" *"="">
+          <input type="submit">
+        </form></div>
+        </foreignObject> -->
+
+        <!-- <foreignObject id="contentBox3" class="content" x="183" y="83" width="100" height="100" transform="matrix(1,0,0,1,0,301)"><div contenteditable="true" style="cursor: default;"> </div></foreignObject>
+        <foreignObject id="contentBox4" class="content" x="400" y="83" width="100" height="100" transform="matrix(1,0,0,1,0,301)"><div contenteditable="true" style="cursor: default;"> </div></foreignObject> -->
+
+
+        <foreignObject id="contentBox0" class="content" x="191" y="277" width="100" height="100" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><div contenteditable="true" >ｄｆさっっｆさ；ｌｊｋｌ</div></foreignObject>
+      </svg>
+ 
+        <p>文章を入力してください</p>
+      </div>
+    </div>    
+    <script src="js/draw.js">
+      const svg = document.getElementById("svg");
+
+let count = 0;
+//描画モード切り替え用
+let drawMode = "";
+//編集状態
+let editable = "";
+
+document.addEventListener("DOMContentLoaded", () => {
+  //テキストボックスメニューがドラッグされているとき-
+  const imgBox_menu = document.getElementById("imgBox_menu");
+  const textBox_menu = document.getElementById("textBox_menu");
+  const arrow_menu = document.getElementById("arrow_menu");
+  imgBox_menu.addEventListener("dragstart", () => (drawMode = "imgbox"));
+  imgBox_menu.addEventListener("dragend", displayToImgbox);
+  textBox_menu.addEventListener("dragstart", () => (drawMode = "textbox"));
+  textBox_menu.addEventListener("dragend", displayToTextbox);
+  arrow_menu.addEventListener("click", () => (drawMode = "arrow"));
+  arrow();
+});
+
+//テキストボックスを表示する
+function displayToTextbox(e) {
+  const svg = document.querySelector("#svg");
+  const foreignObject = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "foreignObject"
+  );
+  const r = svg.getBoundingClientRect();
+  const x = Math.round(e.clientX - r.left);
+  const y = Math.round(e.clientY - r.top);
+  const div = document.createElement("div");
+  setAttributes(foreignObject, {
+    id: "contentBox" + count,
+    class: "content",
+    x: x,
+    y: y,
+    width: 100,
+    height: 100,
+  });
+  div.setAttribute("contenteditable", true);
+  div.textContent = " ";
+  foreignObject.appendChild(div);
+  foreignObject.style.cursor = "default";
+  svg.appendChild(foreignObject);
+
+
+
+
+
+
+
+
+  const mySvg = d3.select("#svg");
+  const paper = d3.select(foreignObject.id);
+  let dx,dy;
+  const start = () => {
+    dx = Math.abs(Number(foreignObject.getAttribute("x")) - d3.event.x);
+    dy = Math.abs(Number(foreignObject.getAttribute("y")) - d3.event.y);
+  };
+  const drag = () => {
+    /*         console.log(
+        "x: " +
+        e.target.getAttribute("x") +
+            "y: " +
+            e.target.getAttribute("y") +
+            "\n" +
+            "event.x: " +
+            d3.event.x +
+            " event.y: " +
+            d3.event.y +
+            (Number(e.target.getAttribute("x")) - d3.event.x) +
+            "y - event.y:" +
+            (Number(e.target.getAttribute("y")) - d3.event.y)
+        ); */
+    paper.attr("x", d3.event.x - dx).attr("y", d3.event.y - dy);
+  };
+
+  paper.on("start",start).on("drag",drag);
+  
+  //図形以外の領域をクリックすると編集状態をfalseへ
+
+  mySvg.click(() => {
+    div.style.cursor = "default";
+    edit = false;
+  });
+
+//クリックされたときに編集状態に変更
+paper.on("dblclick",() => {
+    if (foreignObject.id=="textbox") {
+      div.style.cursor = "auto";
+      paper.on("mousedown .drag",null)
+    } else {
+      edit = "textbox";
+      paper.on("start",start).on("drag",drag);
+    }
+  });
+  
+  
+
+  count++;
+}
+
+
+//要素の属性を一括で設定する
+function setAttributes(element, attributes) {
+  const arr = Object.entries(attributes);
+  arr.forEach(function ([attribute, value]) {
+    element.setAttribute(attribute, value);
+  });
+}
+
+
+    </script>
+
+  </body>
+</html>
+
+

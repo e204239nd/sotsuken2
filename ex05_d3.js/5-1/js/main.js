@@ -4,7 +4,7 @@ let count = 0;
 //描画モード切り替え用
 let drawMode = "";
 //編集状態
-let editable = false;
+let edit = false;
 
 document.addEventListener("DOMContentLoaded", () => {
   //テキストボックスメニューがドラッグされているとき-
@@ -42,24 +42,31 @@ function displayToTextbox(e) {
   foreignObject.appendChild(div);
   svg.appendChild(foreignObject);
 
+
+
+
+
+
+
+
   const mySvg = Snap("#svg");
   const paper = Snap("#contentBox" + count);
   paper.drag();
   //図形以外の領域をクリックすると編集状態をfalseへ
   mySvg.click(() => {
     div.style.cursor = "default";
-    editable = false;
+    edit = false;
     paper.drag();
   });
 
   //クリックされたときに編集状態に変更
   paper.dblclick(() => {
-    if (!editable) {
+    if (!edit) {
       div.style.cursor = "auto";
-      editable = true;
+      edit = true;
       paper.undrag();
     } else {
-      editableable = false;
+      edit = false;
       paper.drag();
     }
   });
@@ -93,44 +100,47 @@ function displayToImgbox(e) {
   });
   foreignObject.appendChild(div);
   svg.appendChild(foreignObject);
-  //画像ファイルをアップロードしたときの処理
-  const formRef = document.querySelector(`#form${count}`);
-  const inputRef = document.querySelector(`#input${count}`);
-  const submitHundler = async (e) => {
-    e.preventDefault();
-    const file = inputRef.files[0];
-    const formData = new FormData();
-    formData.append("img", file);
+  
+}
+function DragEventToTextBox() {
+//画像ファイルをアップロードしたときの処理
+const formRef = document.querySelector(`#form${count}`);
+const inputRef = document.querySelector(`#input${count}`);
+const submitHundler = async (e) => {
+  e.preventDefault();
+  const file = inputRef.files[0];
+  const formData = new FormData();
+  formData.append("img", file);
 
-    const response = await fetch("/upload", {
-      method: "POST",
-      body: formData,
-    });
+  const response = await fetch("/upload", {
+    method: "POST",
+    body: formData,
+  });
 
-    // サーバからのレスポンスをJSONとしてパース
-    const data = await response.json();
+  // サーバからのレスポンスをJSONとしてパース
+  const data = await response.json();
 
-    // アップロード成功のメッセージをアラートで表示
-    alert("画像をアップロードしました");
+  // アップロード成功のメッセージをアラートで表示
+  alert("画像をアップロードしました");
 
-    //画像の挿入
-    const image = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "image"
-    );
-    setAttributes(image, {
-      id: "contentBox" + count,
-      href: data.imagePath,
-      x: x,
-      y: y,
-    });
-    svg.removeChild(foreignObject);
-    svg.appendChild(image);
-    count++;
-  };
-  formRef.addEventListener("submit", submitHundler);
-
+  //画像の挿入
+  const image = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "image"
+  );
+  setAttributes(image, {
+    id: "contentBox" + count,
+    href: data.imagePath,
+    x: x,
+    y: y,
+  });
+  svg.removeChild(foreignObject);
+  svg.appendChild(image);
   count++;
+};
+formRef.addEventListener("submit", submitHundler);
+
+count++;
 }
 
 //要素の属性を一括で設定する
