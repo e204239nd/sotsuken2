@@ -33,11 +33,6 @@ function clickEventHundler() {
     });
     displayContextMenu(contentBox);
   });
-
-  // 任意のアクションを追加
-  /* group.click(function () {
-    alert("クリックされました");
-  }); */
 }
 
 function displayContextMenu(contentBox) {
@@ -86,14 +81,7 @@ rect.attr({
   stroke: "black",
 });
 
-//クリックしたときに選択状態の切り替え
-/*    rect.click(() => {
-  if (Number(rect.attr("opacity")) > 0) {
-    rect.attr("opacity", 0);
-  } else {
-    rect.attr("opacity", 0.8);
-  }
-}); */
+
 group.add(rect);
       //選択した図形をグループに追加する
       for (let i = 0; i < IsClickArray.length; i++) {

@@ -20,8 +20,6 @@ function arrow() {
   const svg = document.querySelector("#svg-container");
   let segs = [];
   let px, py;
-  let arrow;
-  let tmp;
   let arrow_endX, arrow_endY;
   svg.addEventListener("mousedown", (e) => {
     if (mode != "arrow") {

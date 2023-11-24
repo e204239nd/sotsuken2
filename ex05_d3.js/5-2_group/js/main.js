@@ -75,10 +75,11 @@ function displayContextMenu(contentBox) {
     //メニューからグループ化を押したときの処理
     contextMenu.addEventListener("click", (e) => {
       const group = d3.select("#svg").append("g");
+      
       group
         .append("rect")
         .attr("x", 0)
-        .attr("y", 30)
+        .attr("y", 0)
         .attr("width", 150)
         .attr("height", 250)
         .attr("class", "group_frame")
@@ -99,21 +100,44 @@ function displayContextMenu(contentBox) {
         //グループに追加
         group.append(() => clickedElem.node());
       }
+//フレームの大きさを変更
+      const frame = group.select(".group_frame");
+      let max = [];
+      // グループに含まれている要素で座標が最小と最大の値を取得する
+      group.select(".contentBox").each(()=> {
+        if(d3.select(this).attr("x")>max) {
+        }
+        d3.select(this).attr("1")
+      });
+
+
       group.call(
         d3.drag().on("drag", () => {
-          for (let i = 0; i < IsClickArray.length; i++) {
-            const elem = d3.select("#" + IsClickArray[i]);
+          const dx = d3.event.dx;
+          const dy = d3.event.dy;
+          const frame = group.select(".group_frame");
+          
+
+          frame
+            .attr("x", Number(frame.attr("x")) +dx)
+            .attr("y", Number(frame.attr("y")) + dy);
+
+          const elems = group.selectAll(".contentBox");
+          elems.each(function (p, j) {
+            console.log("p: " + p, "j: " + j);
+            const elem = d3.select(this);
             elem
-              .attr("x", Number(elem.attr("x")) + Number(d3.event.dx))
-              .attr("y", Number(elem.attr("y")) + Number(d3.event.dy));
-            console.log(d3.event.x);
-          }
+              .attr("x", Number(elem.attr("x")) + dx)
+              .attr("y", Number(elem.attr("y")) + dy);
+          });
         })
       );
+
       //グループのドラッグ時の処理
 
       contextMenu.parentNode.removeChild(contextMenu); //コンテキストメニューを閉じる
       debugFunc(IsClickArray);
+      IsClickArray = [];
     });
   });
 }
