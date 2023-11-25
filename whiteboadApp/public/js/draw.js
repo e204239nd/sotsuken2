@@ -19,64 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
   arrow();
 });
 
-//矢印を描画する
-function arrow() {
-  //矢印の描画
-  let moveFlag = false;
-  const paper = d3.select("#svg");
-  let tmpX, tmpY;
-  let arrow_endX, arrow_endY;
-
-  // マウスダウンイベント
-  paper.call(
-    d3
-      .drag()
-      .on("start", (event,d) => {
-        if (drawMode != "arrow") {
-          return false;
-        }
-
-        // ページの左端から、要素の左端までの距離
-        tmpX = event.x;
-        // ページの上端から、要素の上端までの距離
-        tmpY = event.y;
-        //矢印の終点の距離
-        arrow_endX = tmpX;
-        arrow_endY = tmpY;
-
-        const segs =
-          "M" + " " + tmpX + " " + tmpY + " L " + arrow_endX + " " + arrow_endY;
-        paper
-          .append("path")
-          .attr("d", segs)
-          .attr("id", "contentBox" + count)
-          .attr("stroke","black")
-          .attr("strokeWeight",1)
-          .attr("class", "arrow")
-          .attr("marker-end", "url(#m_atr)");
-          moveFlag=true;
-      })
-      .on("drag", (event,d) => {
-        if (moveFlag) {
-          arrow_endX = event.x;
-          arrow_endY = event.y;
-         
-          const segs =
-            "M " + tmpX + " " + tmpY + " L " + arrow_endX + " " + arrow_endY;
-          d3.select("#contentBox"+count).attr("d", segs);
-          /*  console.log("tmpX: "+tmpX);
-          console.log("tmpY: "+tmpY);
-          console.log("endX: "+arrow_endX);
-          console.log("endY: "+arrow_endY); */
-        }
-      })
-      .on("end", ()=> {
-        // マウスアップイベント
-        moveFlag = false;
-        count++;
-      })
-  );
-}
 
 
 //テキストボックスを描画する
@@ -102,42 +44,34 @@ function displayToTextbox(e) {
   div.textContent = " ";
   foreignObject.appendChild(div);
   svg.appendChild(foreignObject);
-//この時点ではforeignObjectは生成されていない
+  textBoxMouseEvent(foreignObject);
+  count++;
+}
 
+function textBoxMouseEvent(foreignObject) {
   //テキストボックスのイベント登録
   let dx = 0;
   let dy = 0;
-  const textbox = d3.select("#svg").select(foreignObject.id);
-  console.log(textbox);
-  document.querySelector("p").textContent = textbox;
-  const start = (event,d) => {
+  const textbox = d3.select("#svg").select("#"+foreignObject.id);
+  
+  const start = (event, d) => {
     dx = Math.abs(Number(foreignObject.getAttribute("x")) - event.x);
     dy = Math.abs(Number(foreignObject.getAttribute("y")) - event.y);
+    console.log(dx);
     textbox.attr("x", event.x - dx).attr("y", event.y - dy);
   };
-  const drag = (event,d) => {
-         console.log(
-        "x: " +
-        e.target.getAttribute("x") +
-            "y: " +
-            e.target.getAttribute("y") +
-            "\n" +
-            "event.x: " +
-            event.x +
-            " event.y: " +
-            event.y +
-            (Number(e.target.getAttribute("x")) - event.x) +
-            "y - event.y:" +
-            (Number(e.target.getAttribute("y")) - event.y)
-        ); 
+  const drag = (event, d) => {
     textbox.attr("x", event.x - dx).attr("y", event.y - dy);
   };
 
   //テキストボックスのドラッグ時の処理
-  textbox.on("start", start).on("drag", drag);
+  textbox.call(d3.drag().on("start", start).on("drag", drag));
 
+
+  const div = foreignObject.firstChild;
   //図形以外の領域をクリックすると編集状態をfalseへ
   svg.addEventListener("mousedown", () => {
+    
     div.style.cursor = "default";
     //ドラッグの無効化
     textbox.call(d3.drag().on("drag", null));
@@ -147,8 +81,8 @@ function displayToTextbox(e) {
   //クリックされたときに編集状態に変更
   foreignObject.addEventListener("dblclick", (e) => {
     //図形の始点とマウス座標までの距離
-    // dx = e.offsetX;
-    // dx = e.offsetY;
+    dx = e.offsetX;
+    dx = e.offsetY;
     if (drawMode == "textbox") {
       div.style.cursor = "auto";
     } else {
@@ -158,7 +92,65 @@ function displayToTextbox(e) {
     }
     //ドラッグの無効化
   });
-  count++;
+}
+
+//矢印を描画する
+function arrow() {
+  //矢印の描画
+  let moveFlag = false;
+  const paper = d3.select("#svg");
+  let tmpX, tmpY;
+  let arrow_endX, arrow_endY;
+
+  // マウスダウンイベント
+  paper.call(
+    d3
+      .drag()
+      .on("start", (event, d) => {
+        if (drawMode != "arrow") {
+          return false;
+        }
+
+        // ページの左端から、要素の左端までの距離
+        tmpX = event.x;
+        // ページの上端から、要素の上端までの距離
+        tmpY = event.y;
+        //矢印の終点の距離
+        arrow_endX = tmpX;
+        arrow_endY = tmpY;
+
+        const segs =
+          "M" + " " + tmpX + " " + tmpY + " L " + arrow_endX + " " + arrow_endY;
+        paper
+          .append("path")
+          .attr("d", segs)
+          .attr("id", "contentBox" + count)
+          .attr("stroke", "black")
+          .attr("strokeWeight", 1)
+          .attr("class", "arrow")
+          .attr("marker-end", "url(#m_atr)");
+        moveFlag = true;
+      })
+      .on("drag", (event, d) => {
+        if (moveFlag) {
+          arrow_endX = event.x;
+          arrow_endY = event.y;
+
+          const segs =
+            "M " + tmpX + " " + tmpY + " L " + arrow_endX + " " + arrow_endY;
+          d3.select("#contentBox" + count).attr("d", segs);
+          /*  console.log("tmpX: "+tmpX);
+          console.log("tmpY: "+tmpY);
+          console.log("endX: "+arrow_endX);
+          console.log("endY: "+arrow_endY); */
+        }
+      })
+      .on("end", () => {
+        // マウスアップイベント
+        moveFlag = false;
+        count++;
+      })
+  );
 }
 
 //画像を挿入するためのボックスを表示する
@@ -235,4 +227,24 @@ function setAttributes(element, attributes) {
   });
 }
 
+// DOMツリーが変更された際の処理
+function mutationOberver() {
+  // ターゲット要素を取得
+  const targetNode = document.querySelector("#svg");
 
+  // MutationObserverを生成
+  const observer = new MutationObserver((mutationsList, observer) => {
+    mutationsList.forEach((mutation) => {
+      const elemClass = mutation.addedNodes[0].classList[0];
+      if (mutation.type === "childList" && elemClass == "content") {
+        //  console.log("子ノードの追加が検出されました");
+      }
+    });
+  });
+
+  // 監視オプションを設定
+  const config = { childList: true };
+
+  // オブザーバをターゲットに適用
+  observer.observe(targetNode, config);
+}

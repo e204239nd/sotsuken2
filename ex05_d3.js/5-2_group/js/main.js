@@ -10,18 +10,12 @@ document.addEventListener("DOMContentLoaded", function () {
   //クリック状態を初期化
   IsClickArray = [];
   clickEventHundler();
-  // const svg = document.querySelector("#svg-container");
-  // svg.addEventListener("click", (e) => (IsClickArray = []));
 });
 
 function clickEventHundler() {
   // 外部のSVG要素を取得
   const contentBoxes = document.querySelectorAll(".contentBox");
   contentBoxes.forEach((contentBox) => {
-    // 外部のSVG要素をSnap.svgに追加
-    // const svgObject = Snap(contentBox);
-    // group.add(svgObject);
-
     //クリック時の処理
     contentBox.addEventListener("click", (e) => {
       //シフトキーを押しながらクリックしたときに選択した図形のidを追加する
@@ -33,11 +27,6 @@ function clickEventHundler() {
     });
     displayContextMenu(contentBox);
   });
-
-  // 任意のアクションを追加
-  /* group.click(function () {
-    alert("クリックされました");
-  }); */
 }
 
 function displayContextMenu(contentBox) {
@@ -75,7 +64,7 @@ function displayContextMenu(contentBox) {
     //メニューからグループ化を押したときの処理
     contextMenu.addEventListener("click", (e) => {
       const group = d3.select("#svg").append("g");
-      
+
       group
         .append("rect")
         .attr("x", 0)
@@ -100,31 +89,66 @@ function displayContextMenu(contentBox) {
         //グループに追加
         group.append(() => clickedElem.node());
       }
-//フレームの大きさを変更
+
+      //フレームの大きさを調整する
       const frame = group.select(".group_frame");
-      let max = [];
-      // グループに含まれている要素で座標が最小と最大の値を取得する
-      group.select(".contentBox").each(()=> {
-        if(d3.select(this).attr("x")>max) {
-        }
-        d3.select(this).attr("1")
+      let minX = Infinity,
+        minY = Infinity;
+      let maxX = 0,
+        maxY = 0;
+
+      // グループの最大座標と最小座標を取得する
+
+      group.selectAll(".contentBox").each(function () {
+        const elem = d3.select(this);
+        console.log(elem.attr("x"));
+        console.log(elem.attr("y"));
+        console.log(elem.attr("width"));
+        console.log(elem.attr("height"));
+        minX = Math.min(minX, elem.attr("x"));
+        minY = Math.min(minY, elem.attr("y"));
+
+        maxX = Math.max(
+          maxX,
+          Number(elem.attr("x")) + Number(elem.attr("width")) - minX
+        );
+        maxY =
+          Math.max(maxY, Number(elem.attr("y")) + Number(elem.attr("height"))) -
+          minY;
       });
 
+      debugFunc(
+        "x:" +
+          minX +
+          " y:" +
+          minY +
+          " width:" +
+          maxX +
+          " height:" +
+          maxY +
+          "trueHeight:"
+      );
+
+      //フレームの上下左右の余白
+      const margin = 10;
+      frame
+        .attr("x", minX - margin)
+        .attr("y", minY - margin)
+        .attr("width", maxX + margin * 2)
+        .attr("height", maxY + margin * 2);
 
       group.call(
         d3.drag().on("drag", () => {
           const dx = d3.event.dx;
           const dy = d3.event.dy;
           const frame = group.select(".group_frame");
-          
 
           frame
-            .attr("x", Number(frame.attr("x")) +dx)
+            .attr("x", Number(frame.attr("x")) + dx)
             .attr("y", Number(frame.attr("y")) + dy);
 
           const elems = group.selectAll(".contentBox");
           elems.each(function (p, j) {
-            console.log("p: " + p, "j: " + j);
             const elem = d3.select(this);
             elem
               .attr("x", Number(elem.attr("x")) + dx)
@@ -136,7 +160,7 @@ function displayContextMenu(contentBox) {
       //グループのドラッグ時の処理
 
       contextMenu.parentNode.removeChild(contextMenu); //コンテキストメニューを閉じる
-      debugFunc(IsClickArray);
+
       IsClickArray = [];
     });
   });
