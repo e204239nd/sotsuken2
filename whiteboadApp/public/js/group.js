@@ -1,25 +1,30 @@
-let IsClickArray = [];
+//選択図形を格納する配列
+let IsClickArray;
 
 document.addEventListener("DOMContentLoaded", function () {
   //クリック状態を初期化
   IsClickArray = [];
-  clickEventHundler();
+  mutationOberver();
 });
 
-function clickEventHundler() {
-  // 外部のSVG要素を取得
-  const contentBoxes = document.querySelectorAll(".contentBox");
-  contentBoxes.forEach((contentBox) => {
+function clickEventHundler(contentBoxes) {
+  for (let i = 0; i < contentBoxes.length; i++) {
+    const contentBox = contentBoxes[i];
+    if (contentBox.classList[0] != "contentBox") {
+      continue;
+    }
     //クリック時の処理
     contentBox.addEventListener("click", (e) => {
-      //シフトキーを押しながらクリックしたときに選択した図形のidを追加する
+      //シフトキー＋クリックした時
       if (e.shiftKey && !IsClickArray.includes(contentBox.id)) {
         const num = contentBox.id;
+        // 選択図形としてisClickArrayに追加
         IsClickArray.push(num);
       }
     });
+    //コンテキストメニューの表示
     displayContextMenu(contentBox);
-  });
+  }
 }
 
 function displayContextMenu(contentBox) {
@@ -48,81 +53,95 @@ function displayContextMenu(contentBox) {
     setAttributes(foreignObject, {
       x: px,
       y: py,
-      width: 500,
-      height: 500,
+      width: 100,
+      height: 100,
     });
     foreignObject.appendChild(contextMenu);
     svg.appendChild(foreignObject);
 
-    //メニューからグループ化を押したときの処理
-    contextMenu.addEventListener("click", () => {
-      const group = d3.select("#svg").append("g");
-      
+    //メニューのグループ化を選択した際の処理
+    contextMenu.addEventListener("click", (e) => {
+      const group = d3
+        .select("#svg")
+        .append("g")
+        .attr("style", "blue")
+        .attr("stroke", "black")
+        .attr("strokeWeight", 2)
+        .attr("class", "groupObj");
+
+      //グループを囲むフレーム（枠）の追加
       group
         .append("rect")
+        .attr("class", "group_frame")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("width", 150)
-        .attr("height", 250)
-        .attr("class", "group_frame")
+        .attr("width", 0)
+        .attr("height", 0)
         .attr("opcity", 0)
         .attr("fill", "white")
+        .attr("opacity", 0.7)
         .attr("strokeWidth", 1)
         .attr("stroke", "black");
 
       //選択した図形をグループに追加する
       for (let i = 0; i < IsClickArray.length; i++) {
-        // グループの属性を設定
-        group
-          .attr("fill", "blue")
-          .attr("stroke", "black")
-          .attr("strokeWeight", 2)
-          .attr("class", "groupObj");
+        console.log(IsClickArray);
         const clickedElem = d3.select("#" + IsClickArray[i]);
+
         //グループに追加
         group.append(() => clickedElem.node());
       }
-//フレームの大きさを変更
+
+      //フレームの大きさを調整する
+
+      // グループの始点と終点を設定する
+      const contentBox = group.select(".contentBox");
       const frame = group.select(".group_frame");
-      let minX = Infinity,minY=Infinity;
-      let maxX = 0,maxY=0;
-      // グループに含まれている要素で座標が最小と最大の値を取得する
-      group.select(".contentBox").each(function() {
-        const elem = d3.select(this);
-        minX = Math.min(minX,elem.attr("x"));
-       minY = Math.min(minY,elem.attr("y")); 
-       console.log(Number(elem.attr("x"))+elem.attr("width"));
-       console.log(Number(elem.attr("x"))+elem.attr("height"));
-       maxX = Math.max(maxX,Number(elem.attr("x"))+elem.attr("width"));
-       maxY = Math.max(maxY,Number(elem.attr("y"))+elem.attr("height"));
-      });
+      const r = contentBox.node().parentNode.getBoundingClientRect();
+      console.log(r);
+      const frameX = r.x;
+      const frameY = r.y;
+      const frameW = r.width;
+      const frameH = r.height;
 
-
-      group.call(
-        d3.drag().on("drag", (event,d) => {
-          const dx = event.dx;
-          const dy = event.dy;
-          const frame = group.select(".group_frame");
-          
-
-          frame
-            .attr("x", Number(frame.attr("x")) +dx)
-            .attr("y", Number(frame.attr("y")) + dy);
-
-          const elems = group.selectAll(".contentBox");
-          elems.each(function () {
-            const elem = d3.select(this);
-            elem
-              .attr("x", Number(elem.attr("x")) + dx)
-              .attr("y", Number(elem.attr("y")) + dy);
-          });
-        })
-      );
+      
+      //フレームの上下左右の余白
+      const margin = 10;
+      frame
+        .attr("x", frameX-margin*2)
+        .attr("y", frameY-margin)
+        .attr("width", frameW+margin*2)
+        .attr("height", frameH+margin*2);
 
       //グループのドラッグ時の処理
+      group.call(
+        d3
+          .drag()
+          .on("start", () => frame.attr("style", "display:block"))
+          .on("drag", (event, d) => {
+            const dx = event.dx;
+            const dy = event.dy;
+            frame
+              .attr("x", Number(frame.attr("x")) + dx)
+              .attr("y", Number(frame.attr("y")) + dy);
 
-      contextMenu.parentNode.removeChild(contextMenu); //コンテキストメニューを閉じる
-      debugFunc(IsClickArray);
+            const elems = group.selectAll(".contentBox");
+            elems.each(function (p, j) {
+              const elem = d3.select(this);
+              elem
+                .attr("x", Number(elem.attr("x")) + dx)
+                .attr("y", Number(elem.attr("y")) + dy);
+            });
+          })
+      );
+
+      //他をクリックした際に非表示にする
+      document
+        .querySelector("#svg")
+        .addEventListener("click", () => frame.attr("style"));
+
+      contextMenu.parentNode.parentNode.removeChild(contextMenu.parentNode); //コンテキストメニューを閉じる
+
       IsClickArray = [];
     });
   });
@@ -140,17 +159,16 @@ function setAttributes(element, attributes) {
 // DOMツリーが変更された際の処理
 function mutationOberver() {
   // ターゲット要素を取得
-  const targetNode = document.getElementById("#svg");
+  const targetNode = document.getElementById("svg");
 
   // MutationObserverを生成
   const observer = new MutationObserver((mutationsList, observer) => {
     mutationsList.forEach((mutation) => {
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
         // 子ノードの追加が検出された場合の処理
-        clickEventHundler();
+        clickEventHundler(mutation.addedNodes);
         console.log("子ノードの追加が検出されました");
-      }
-      if (mutation.type === "childList") {
+      } else if (mutation.type === "childList") {
         IsClickArray = Array(IsClickArray.length).fill(0);
         console.log("子ノードの削除が検出されました");
       }
@@ -182,4 +200,3 @@ function debugFunc(str) {
   elem.id = "debug";
   document.querySelector("svg").appendChild(elem);
 }
-

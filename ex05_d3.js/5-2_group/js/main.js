@@ -4,7 +4,8 @@
 ・要素が追加・削除された際にイベント登録を行うようにする予定
  */
 
-let IsClickArray = [];
+//選択図形を格納する配列
+let IsClickArray;
 
 document.addEventListener("DOMContentLoaded", function () {
   //クリック状態を初期化
@@ -18,7 +19,7 @@ function clickEventHundler() {
   contentBoxes.forEach((contentBox) => {
     //クリック時の処理
     contentBox.addEventListener("click", (e) => {
-      //シフトキーを押しながらクリックしたときに選択した図形のidを追加する
+      //シフトキー＋クリックで選択した図形のidを追加する
       if (e.shiftKey && !IsClickArray.includes(contentBox.id)) {
         const num = contentBox.id;
         IsClickArray.push(num);
@@ -74,6 +75,7 @@ function displayContextMenu(contentBox) {
         .attr("class", "group_frame")
         .attr("opcity", 0)
         .attr("fill", "white")
+        .attr("opacity",0.7)
         .attr("strokeWidth", 1)
         .attr("stroke", "black");
 
@@ -91,7 +93,7 @@ function displayContextMenu(contentBox) {
       }
 
       //フレームの大きさを調整する
-      const frame = group.select(".group_frame");
+
       let minX = Infinity,
         minY = Infinity;
       let maxX = 0,
@@ -129,6 +131,7 @@ function displayContextMenu(contentBox) {
           "trueHeight:"
       );
 
+      const frame = group.select(".group_frame");
       //フレームの上下左右の余白
       const margin = 10;
       frame
@@ -138,24 +141,30 @@ function displayContextMenu(contentBox) {
         .attr("height", maxY + margin * 2);
 
       group.call(
-        d3.drag().on("drag", () => {
-          const dx = d3.event.dx;
-          const dy = d3.event.dy;
-          const frame = group.select(".group_frame");
+        d3
+          .drag()
+          .on("start", () => frame.attr("style", "display:block"))
+          .on("drag", () => {
+            const dx = d3.event.dx;
+            const dy = d3.event.dy;
+            frame
+              .attr("x", Number(frame.attr("x")) + dx)
+              .attr("y", Number(frame.attr("y")) + dy);
 
-          frame
-            .attr("x", Number(frame.attr("x")) + dx)
-            .attr("y", Number(frame.attr("y")) + dy);
-
-          const elems = group.selectAll(".contentBox");
-          elems.each(function (p, j) {
-            const elem = d3.select(this);
-            elem
-              .attr("x", Number(elem.attr("x")) + dx)
-              .attr("y", Number(elem.attr("y")) + dy);
-          });
-        })
+            const elems = group.selectAll(".contentBox");
+            elems.each(function (p, j) {
+              const elem = d3.select(this);
+              elem
+                .attr("x", Number(elem.attr("x")) + dx)
+                .attr("y", Number(elem.attr("y")) + dy);
+            });
+          })
       );
+
+      //他をクリックした際に非表示にする
+      document
+        .querySelector("#svg")
+        .addEventListener("click", () => frame.attr("style"));
 
       //グループのドラッグ時の処理
 

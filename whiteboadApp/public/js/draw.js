@@ -34,7 +34,7 @@ function displayToTextbox(e) {
   const div = document.createElement("div");
   setAttributes(foreignObject, {
     id: "contentBox" + count,
-    class: "content",
+    class: "contentBox",
     x: x,
     y: y,
     width: 100,
@@ -57,7 +57,6 @@ function textBoxMouseEvent(foreignObject) {
   const start = (event, d) => {
     dx = Math.abs(Number(foreignObject.getAttribute("x")) - event.x);
     dy = Math.abs(Number(foreignObject.getAttribute("y")) - event.y);
-    console.log(dx);
     textbox.attr("x", event.x - dx).attr("y", event.y - dy);
   };
   const drag = (event, d) => {
@@ -171,7 +170,7 @@ function displayToImgbox(e) {
   setAttributes(div, { class: "contentBox" });
   setAttributes(foreignObject, {
     id: "contentBox" + count,
-    class: "content",
+    class: "contentBox",
     x: x,
     y: y,
     width: 100,
@@ -225,26 +224,4 @@ function setAttributes(element, attributes) {
   arr.forEach(function ([attribute, value]) {
     element.setAttribute(attribute, value);
   });
-}
-
-// DOMツリーが変更された際の処理
-function mutationOberver() {
-  // ターゲット要素を取得
-  const targetNode = document.querySelector("#svg");
-
-  // MutationObserverを生成
-  const observer = new MutationObserver((mutationsList, observer) => {
-    mutationsList.forEach((mutation) => {
-      const elemClass = mutation.addedNodes[0].classList[0];
-      if (mutation.type === "childList" && elemClass == "content") {
-        //  console.log("子ノードの追加が検出されました");
-      }
-    });
-  });
-
-  // 監視オプションを設定
-  const config = { childList: true };
-
-  // オブザーバをターゲットに適用
-  observer.observe(targetNode, config);
 }
