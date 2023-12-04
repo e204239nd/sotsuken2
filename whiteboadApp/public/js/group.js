@@ -1,25 +1,23 @@
 //選択図形を格納する配列
 let IsClickArray;
-
+let groupCnt = 0;
 document.addEventListener("DOMContentLoaded", function () {
   //クリック状態を初期化
   IsClickArray = [];
   mutationOberver();
 });
 
+// 図形クリック時の処理
 function clickEventHundler(contentBoxes) {
+  console.log(contentBoxes);
   for (let i = 0; i < contentBoxes.length; i++) {
-    const contentBox = contentBoxes[i];
-    if (contentBox.classList[0] != "contentBox") {
-      continue;
-    }
+    let contentBox = contentBoxes[i];
+
     //クリック時の処理
     contentBox.addEventListener("click", (e) => {
-      //シフトキー＋クリックした時
       if (e.shiftKey && !IsClickArray.includes(contentBox.id)) {
-        const num = contentBox.id;
-        // 選択図形としてisClickArrayに追加
-        IsClickArray.push(num);
+        // 親がグループ化された図形の場合
+        IsClickArray.push(contentBox.id);
       }
     });
     //コンテキストメニューの表示
@@ -27,6 +25,7 @@ function clickEventHundler(contentBoxes) {
   }
 }
 
+//コンテキストメニューの表示
 function displayContextMenu(contentBox) {
   //右クリック時の処理
   contentBox.addEventListener("contextmenu", (e) => {
@@ -59,7 +58,7 @@ function displayContextMenu(contentBox) {
     foreignObject.appendChild(contextMenu);
     svg.appendChild(foreignObject);
 
-    //メニューのグループ化を選択した際の処理
+    //メニューをクリックしたときの処理
     contextMenu.addEventListener("click", (e) => {
       const group = d3
         .select("#svg")
@@ -67,7 +66,8 @@ function displayContextMenu(contentBox) {
         .attr("style", "blue")
         .attr("stroke", "black")
         .attr("strokeWeight", 2)
-        .attr("class", "groupObj");
+        .attr("id", "groupObj" + groupCnt)
+        .attr("class", "groupObj contentBox");
 
       //グループを囲むフレーム（枠）の追加
       group
@@ -77,7 +77,6 @@ function displayContextMenu(contentBox) {
         .attr("y", 0)
         .attr("width", 0)
         .attr("height", 0)
-        .attr("opcity", 0)
         .attr("fill", "white")
         .attr("opacity", 0.7)
         .attr("strokeWidth", 1)
@@ -85,66 +84,85 @@ function displayContextMenu(contentBox) {
 
       //選択した図形をグループに追加する
       for (let i = 0; i < IsClickArray.length; i++) {
-        console.log(IsClickArray);
         const clickedElem = d3.select("#" + IsClickArray[i]);
-
         //グループに追加
         group.append(() => clickedElem.node());
       }
 
       //フレームの大きさを調整する
+      setFrameSize(group);
 
-      // グループの始点と終点を設定する
-      const contentBox = group.select(".contentBox");
       const frame = group.select(".group_frame");
-      const r = contentBox.node().parentNode.getBoundingClientRect();
-      console.log(r);
-      const frameX = r.x;
-      const frameY = r.y;
-      const frameW = r.width;
-      const frameH = r.height;
-
-      
-      //フレームの上下左右の余白
-      const margin = 10;
-      frame
-        .attr("x", frameX-margin*2)
-        .attr("y", frameY-margin)
-        .attr("width", frameW+margin*2)
-        .attr("height", frameH+margin*2);
-
-      //グループのドラッグ時の処理
+      //グループをドラッグした時の処理
       group.call(
-        d3
-          .drag()
-          .on("start", () => frame.attr("style", "display:block"))
-          .on("drag", (event, d) => {
+        d3.drag().on("drag", (event, d) => {
+          const dx = event.dx;
+          const dy = event.dy;
+          const elems = group.selectAll("*");
+          elems.each(function (p, j) {
+            const elem = d3.select(this);
+            elem
+              .attr("x", Number(elem.attr("x")) + dx)
+              .attr("y", Number(elem.attr("y")) + dy);
+          });
+        })
+      );
+
+      //ダブルクリックした時の処理
+      group.on("dblclick", () => {
+        //グループ化の枠を表示する
+        const frame = group.select(".group_frame");
+        frame.attr("opacity", 0.7);
+        group.call(
+          d3.drag().on("drag", (event, d) => {
             const dx = event.dx;
             const dy = event.dy;
-            frame
-              .attr("x", Number(frame.attr("x")) + dx)
-              .attr("y", Number(frame.attr("y")) + dy);
-
-            const elems = group.selectAll(".contentBox");
+            const elems = group.selectAll("*");
             elems.each(function (p, j) {
               const elem = d3.select(this);
+              /* if (elem.attr("class") == "arrow") {
+                console.log(elem.attr("d"));
+              } */
               elem
                 .attr("x", Number(elem.attr("x")) + dx)
                 .attr("y", Number(elem.attr("y")) + dy);
             });
           })
-      );
+        );
+      });
 
       //他をクリックした際に非表示にする
-      document
-        .querySelector("#svg")
-        .addEventListener("click", () => frame.attr("style"));
-
+      document.querySelector("#svg").addEventListener("click", () => {
+        if (drawMode == ""){ 
+          frame.attr("opacity", 0);
+          group.call(d3.drag().on("drag",null))
+      }
+      });
+      clickEventHundler(group.node());
       contextMenu.parentNode.parentNode.removeChild(contextMenu.parentNode); //コンテキストメニューを閉じる
-
       IsClickArray = [];
+      groupCnt++;
+      console.log(IsClickArray);
     });
   });
+}
+
+function setFrameSize(group) {
+  // グループの始点と終点を設定する
+  const frame = group.select(".group_frame");
+  console.log(frame.node());
+  const r = frame.node().parentNode.getBoundingClientRect();
+  const frameX = r.x;
+  const frameY = r.y;
+  const frameW = r.width;
+  const frameH = r.height;
+  //フレームの上下左右の余白
+  const margin = 10;
+  frame
+    .attr("x", frameX - margin * 2)
+    .attr("y", frameY - margin)
+    .attr("width", frameW + margin * 2)
+    .attr("height", frameH + margin * 2);
 }
 
 //要素の属性を一括で設定する

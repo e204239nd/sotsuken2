@@ -145,6 +145,7 @@ function displayContextMenu(contentBox) {
           .drag()
           .on("start", () => frame.attr("style", "display:block"))
           .on("drag", () => {
+            console.log(group.node());
             const dx = d3.event.dx;
             const dy = d3.event.dy;
             frame
