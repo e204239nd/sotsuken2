@@ -1,53 +1,63 @@
 body {
-    margin: 0 10px;
-  }
+  margin: 0 10px;
+  padding: 0;
+}
+
+foreignObject {
+  position: absolute;
+  background-color: green;
+}
+
+foreignObject:first-child {
+  position: relative;
+  left: auto;
+  right: auto;
+}
+
+/* 
+フォームで
+textarea {
+  background-color: black;
+  color: white;
+  width: 200px;
+  height: 100px;
+  line-height: 70px;
+  font-size: 16px;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 0;
+} */
+
+.helo {
+  display: flex;
+}
+
+aside {
+  position: fixed;
+  left: 0;
+  height: 100%;
+  background-color: rgb(56, 190, 211);
+}
+
+/* .box {
+  background-color: black;
+  width: 70px;
+  height: 70px;
+  line-height: 70px;
+  text-align: center;
+  color: white;
+  margin-top: 15px;
+}
+ */
+
+ .box img {
+  width:50px;
+ }
+/* メニューボタン */
+#textBox_menu {
   
-  foreignObject {
-    position: absolute;
-    background-color: green;
-  }
+}
+
+#imgBox_menu {
   
-  foreignObject:first-child {
-    position: relative;
-    left: auto;
-    right: auto;
-  }
-  
-  textarea {
-    background-color: black;
-    color: white;
-    width: 200px;
-    height: 100px;
-    line-height: 70px;
-    font-size: 16px;
-    max-width: 100%;
-    max-height: 100%;
-    padding:0;
-  }
-  
-  .menu {
-    display: flex;
-  }
-  
-  .box {
-    background-color: black;
-    width: 70px;
-    height: 70px;
-    line-height: 70px;
-    text-align: center;
-    color: white;
-    margin-left: 30px;
-  }
-  
-  /* メニューボタン */
-  #textBox_menu {
-    margin: 0;
-    background-color: black;
-    color: white;
-  }
-  
-  #imgBox_menu {
-    background-color: rgb(35, 142, 71);
-    color: white;
-  }
-  
+}

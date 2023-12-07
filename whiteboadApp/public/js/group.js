@@ -1,38 +1,13 @@
 //選択図形を格納する配列
 let IsClickArray;
 let groupCnt = 0;
-document.addEventListener("DOMContentLoaded", function () {
-  //クリック状態を初期化
-  IsClickArray = [];
-  mutationOberver();
-});
-
-// 図形クリック時の処理
-function clickEventHundler(contentBoxes) {
-  console.log(contentBoxes);
-  for (let i = 0; i < contentBoxes.length; i++) {
-    let contentBox = contentBoxes[i];
-
-    //クリック時の処理
-    contentBox.addEventListener("click", (e) => {
-      if (e.shiftKey && !IsClickArray.includes(contentBox.id)) {
-        // 親がグループ化された図形の場合
-        IsClickArray.push(contentBox.id);
-      }
-    });
-    //コンテキストメニューの表示
-    displayContextMenu(contentBox);
-  }
-}
 
 //コンテキストメニューの表示
 function displayContextMenu(contentBox) {
   //右クリック時の処理
   contentBox.addEventListener("contextmenu", (e) => {
-    if (IsClickArray.length <= 1) {
-      return;
-    }
-    // グループ化した図形の枠の要素を取得
+    if (IsClickArray.length <= 1) return;
+    // グループ図形の枠の大きさを取得
     const clientRect = contentBox.getBoundingClientRect();
 
     // ページの左端から、要素の左端までの距離
@@ -50,6 +25,7 @@ function displayContextMenu(contentBox) {
     const contextMenu = document.createElement("div");
     contextMenu.innerHTML = `<a class="groupBtn"><button style="background:gray; padding:5px;">グループ化</button></a></ul>`;
     setAttributes(foreignObject, {
+      id: "contextMenu",
       x: px,
       y: py,
       width: 100,
@@ -60,6 +36,7 @@ function displayContextMenu(contentBox) {
 
     //メニューをクリックしたときの処理
     contextMenu.addEventListener("click", (e) => {
+      e.stopPropagation(); //親要素のイベントを実行しないようにする
       const group = d3
         .select("#svg")
         .append("g")
@@ -91,55 +68,52 @@ function displayContextMenu(contentBox) {
 
       //フレームの大きさを調整する
       setFrameSize(group);
+      const drag = (event, d) => {
+        const dx = event.dx;
+        const dy = event.dy;
+        const elems = group.selectAll("*");
+        elems.each(function (p, j) {
+          const elem = d3.select(this);
+          /* if (elem.attr("class") == "arrow") {
+            console.log(elem.attr("d"));
+          } */
+          elem
+            .attr("x", Number(elem.attr("x")) + dx)
+            .attr("y", Number(elem.attr("y")) + dy);
+        });
+      };
+
+      //グループをドラッグした時の処理
+      group.call(d3.drag().on("drag", drag));
 
       const frame = group.select(".group_frame");
-      //グループをドラッグした時の処理
-      group.call(
-        d3.drag().on("drag", (event, d) => {
-          const dx = event.dx;
-          const dy = event.dy;
-          const elems = group.selectAll("*");
-          elems.each(function (p, j) {
-            const elem = d3.select(this);
-            elem
-              .attr("x", Number(elem.attr("x")) + dx)
-              .attr("y", Number(elem.attr("y")) + dy);
-          });
-        })
-      );
-
       //ダブルクリックした時の処理
       group.on("dblclick", () => {
         //グループ化の枠を表示する
-        const frame = group.select(".group_frame");
         frame.attr("opacity", 0.7);
-        group.call(
-          d3.drag().on("drag", (event, d) => {
-            const dx = event.dx;
-            const dy = event.dy;
-            const elems = group.selectAll("*");
-            elems.each(function (p, j) {
-              const elem = d3.select(this);
-              /* if (elem.attr("class") == "arrow") {
-                console.log(elem.attr("d"));
-              } */
-              elem
-                .attr("x", Number(elem.attr("x")) + dx)
-                .attr("y", Number(elem.attr("y")) + dy);
-            });
-          })
-        );
+        group.call(d3.drag().on("drag", drag));
       });
 
-      //他をクリックした際に非表示にする
-      document.querySelector("#svg").addEventListener("click", () => {
-        if (drawMode == ""){ 
-          frame.attr("opacity", 0);
-          group.call(d3.drag().on("drag",null))
-      }
+      
+
+      frame.on("click", (event, d) => {
+        debugFunc("クリック");
+        frame.attr("opacity", 0.7);
       });
+
+      //削除するコンテキストメニュー
+      const removeMenu = contextMenu.parentNode;
+
+      //図形の外をクリックした際の処理
+      svg.addEventListener("click", (e) => {
+        if (e.target.id == "svg") {
+          frame.attr("opacity", 0);
+          group.call(d3.drag().on("drag", null));
+        }
+      });
+
       clickEventHundler(group.node());
-      contextMenu.parentNode.parentNode.removeChild(contextMenu.parentNode); //コンテキストメニューを閉じる
+      svg.removeChild(removeMenu); //コンテキストメニューを閉じる
       IsClickArray = [];
       groupCnt++;
       console.log(IsClickArray);
@@ -147,22 +121,50 @@ function displayContextMenu(contentBox) {
   });
 }
 
+// 図形クリック時の処理
+function clickEventHundler(contentBoxes) {
+  for (let i = 0; i < contentBoxes.length; i++) {
+    let contentBox = contentBoxes[i];
+
+    contentBox.addEventListener("click", (e) => {
+      // グループ化した図形は追加しない
+      if (contentBox.parentNode.classList[0] == "groupObj") return;
+
+      //シフトキーを押していて、isclickArrayに図形のidが含まれていなければ
+      if (e.shiftKey && !IsClickArray.includes(contentBox.id)) {
+        if (contentBox.classList[0] == "groupObj") {
+          const frame = contentBox.querySelector(".group_frame");
+          frame.setAttribute("opacity", 0.7);
+        }
+
+        // 図形のidをisClickArrayに追加する
+        IsClickArray.push(contentBox.id);
+      }
+      // debugFunc(IsClickArray);
+    });
+    //コンテキストメニューの表示
+    displayContextMenu(contentBox);
+  }
+}
+
+// グループ図形の枠のサイズを変更する
 function setFrameSize(group) {
   // グループの始点と終点を設定する
   const frame = group.select(".group_frame");
   console.log(frame.node());
   const r = frame.node().parentNode.getBoundingClientRect();
+  const margin = 10;
   const frameX = r.x;
   const frameY = r.y;
   const frameW = r.width;
   const frameH = r.height;
   //フレームの上下左右の余白
-  const margin = 10;
+  
   frame
-    .attr("x", frameX - margin * 2)
-    .attr("y", frameY - margin)
-    .attr("width", frameW + margin * 2)
-    .attr("height", frameH + margin * 2);
+    .attr("x", frameX )
+    .attr("y", frameY )
+    .attr("width", frameW)
+    .attr("height", frameH);
 }
 
 //要素の属性を一括で設定する
@@ -203,18 +205,5 @@ function mutationOberver() {
 // デバッグ画面を表示
 function debugFunc(str) {
   const debugTxt = document.querySelector("#debug");
-  if (debugTxt) {
-    debugTxt.textContent = str;
-    return;
-  }
-
-  const elem = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "foreignObject"
-  );
-  elem.style =
-    "background:aliceblue; y:0;width:100vw;height:2rem;font-size:1rem;";
-  elem.textContent = str;
-  elem.id = "debug";
-  document.querySelector("svg").appendChild(elem);
+  debugTxt.textContent = str;
 }
