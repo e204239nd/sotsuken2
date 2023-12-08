@@ -30,17 +30,17 @@
 
 
 ## group.jsで利用されている関数:
-#### 10. displayContextMenu(contentBox)
+#### 10. `displayContextMenu(contentBox)`
 - コンテキストメニューを表示するための関数。右クリック時の処理や図形のグループ化などを実行する。
   
-#### 11. clickEventHundler(contentBoxes)
+#### 11. `clickEventHundler(contentBoxes)`
 - 図形クリック時の処理を管理する関数。シフトキーの押下や図形のクリックなどを処理する。
   
-#### 12. setFrameSize(group)
+#### 12. `setFrameSize(group)`
 - グループ図形の枠のサイズを変更するための関数。指定されたグループのサイズを計算して枠の大きさを変更する。
   
-#### 13. mutationOberver()
+#### 13. `mutationOberver()`
 - DOMツリーが変更された際の処理を管理する関数。子ノードの追加や削除を検出し、対応する処理を実行する。
   
-#### 14. debugFunc(str)
+#### 14. `debugFunc(str)`
 - デバッグ画面を表示するための関数。指定されたテキストをデバッグ用のエリアに表示する。
