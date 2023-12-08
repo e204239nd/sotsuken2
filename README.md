@@ -30,6 +30,7 @@
 #### 9. `setAttributes(element, attributes)`
 - 要素の属性を一括で設定します。
 
+
 ### group.jsで利用されている関数:
 #### 10. displayContextMenu(contentBox)
 - コンテキストメニューを表示するための関数です。右クリック時の処理や図形のグループ化などを実行します。
