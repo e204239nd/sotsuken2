@@ -1,0 +1,34 @@
+# 関数同士の関係性
+各関数内で利用されている関数について記述する
+
+## shape.jsで利用されている関数
+
+#### 1. `displayToRect()`
+- 利用されている関数:
+  - `rectDragEvent(shape)`
+
+#### 2. `displayToCircle()`
+- 利用されている関数:
+  - `rectDragEvent(shape)`
+
+#### 3. `rectDragEvent(shape)`
+- 利用されている関数: なし
+
+#### 4. `arrow()`
+- 利用されている関数: なし
+
+#### 5. `displayToTextbox(e)`
+- 利用されている関数:
+  - `rectDragEvent(textbox)`
+
+#### 6. `textBoxMouseEvent(textbox)`
+- 利用されている関数:
+  - `rectDragEvent(textbox)`
+
+#### 7. `displayToImgbox(e)`
+- 利用されている関数:
+  - `uploadImg(x, y)`
+
+#### 8. `uploadImg(x, y)`
+- 利用されている関数:
+  - `rectDragEvent(image)`
