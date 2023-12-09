@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   rect_menu.addEventListener("dragend", displayToRect);
   circle_menu.addEventListener("dragstart", () => (drawMode = "circle"));
   circle_menu.addEventListener("dragend", displayToCircle);  
-  arrow();
+  displayToArrow();
 
   mutationOberver();
   const svg = document.querySelector("#svg");
@@ -29,5 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
   IsClickArray = [];
 });
 
+document.addEventListener('keydown', function(e) {
+  if(e.key === 'Escape'){
+    drawMode="";
+  }
+})
 
 

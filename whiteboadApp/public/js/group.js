@@ -66,59 +66,90 @@ function displayContextMenu(contentBox) {
         group.append(() => clickedElem.node());
       }
 
+      groupEvent(group);
       //フレームの大きさを調整する
       setFrameSize(group);
-      const drag = (event, d) => {
-        const dx = event.dx;
-        const dy = event.dy;
-        const elems = group.selectAll("*");
-        elems.each(function (p, j) {
-          const elem = d3.select(this);
-          /* if (elem.attr("class") == "arrow") {
-            console.log(elem.attr("d"));
-          } */
-          elem
-            .attr("x", Number(elem.attr("x")) + dx)
-            .attr("y", Number(elem.attr("y")) + dy);
-        });
-      };
-
-      //グループをドラッグした時の処理
-      group.call(d3.drag().on("drag", drag));
-
-      const frame = group.select(".group_frame");
-      //ダブルクリックした時の処理
-      group.on("dblclick", () => {
-        //グループ化の枠を表示する
-        frame.attr("opacity", 0.7);
-        group.call(d3.drag().on("drag", drag));
-      });
-
-      
-
-      frame.on("click", (event, d) => {
-        debugFunc("クリック");
-        frame.attr("opacity", 0.7);
-      });
-
-      //削除するコンテキストメニュー
       const removeMenu = contextMenu.parentNode;
-
-      //図形の外をクリックした際の処理
-      svg.addEventListener("click", (e) => {
-        if (e.target.id == "svg") {
-          frame.attr("opacity", 0);
-          group.call(d3.drag().on("drag", null));
-        }
-      });
-
-      clickEventHundler(group.node());
       svg.removeChild(removeMenu); //コンテキストメニューを閉じる
       IsClickArray = [];
       groupCnt++;
       console.log(IsClickArray);
     });
   });
+}
+
+//グループ化された図形のイベント
+function groupEvent(group) {
+  const drag = (event, d) => {
+    const dx = event.dx;
+    const dy = event.dy;
+    const elems = group.selectAll("*");
+    //グループ内のそれぞれの図形に対してドラッグイベントを付与する
+
+    //矢印の移動：矢印が移動しない
+    if (!group.select(".arrow").empty()) {
+      //現時点の矢印の始点と終点の座標
+      const seg = getArrowPos(group.select(".arrow").attr("d"));
+      console.dir(seg);
+      const x = seg.x + dx;
+      const y = seg.y + dy;
+      const d = `M ${x} ${y} L ${seg.endX + dx} ${seg.endY + dy}`;
+      group.select(".arrow").attr("d", d);
+      group
+        .select(".group_frame")
+        .attr("x", Number(group.select(".group_frame").attr("x")) + dx)
+        .attr("y", Number(group.select(".group_frame").attr("y")) + dy);
+    } else {
+      elems.each(function (p, j) {
+        const elem = d3.select(this);
+        //四角・円の移動
+        const cx = elem.attr("cx");
+        if (cx) {
+          elem
+            .attr("cx", Number(elem.attr("cx")) + dx)
+            .attr("cy", Number(elem.attr("cy")) + dy);
+        } else {
+          elem
+            .attr("x", Number(elem.attr("x")) + dx)
+            .attr("y", Number(elem.attr("y")) + dy);
+        }
+      });
+    }
+  };
+  //グループをドラッグした時の処理
+  group.call(
+    d3
+      .drag()
+      .on("drag", drag)
+      .on("end", () => {
+        console.log(group.select(".arrow").empty());
+        if (group.select(".arrow").empty()) {
+          setFrameSize(group);
+        }
+      })
+  );
+
+  const frame = group.select(".group_frame");
+  //ダブルクリックした時の処理
+  group.on("dblclick", () => {
+    //グループ化の枠を表示する
+    frame.attr("opacity", 0.7);
+    group.call(d3.drag().on("drag", drag));
+  });
+
+  frame.on("click", (event, d) => {
+    frame.attr("opacity", 0.7);
+  });
+
+  //図形の外をクリックした際の処理
+  svg.addEventListener("click", (e) => {
+    if (e.target.id == "svg") {
+      frame.attr("opacity", 0);
+      group.call(d3.drag().on("drag", null));
+    }
+  });
+
+  clickEventHundler(group.node());
 }
 
 // 図形クリック時の処理
@@ -140,31 +171,51 @@ function clickEventHundler(contentBoxes) {
         // 図形のidをisClickArrayに追加する
         IsClickArray.push(contentBox.id);
       }
-      // debugFunc(IsClickArray);
     });
     //コンテキストメニューの表示
     displayContextMenu(contentBox);
   }
 }
 
-// グループ図形の枠のサイズを変更する
+// グループ図形の枠のサイズを変更する:ChatGPT利用
 function setFrameSize(group) {
-  // グループの始点と終点を設定する
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  // グループ内の全ての図形をループして、最小の矩形を計算
+  group.selectAll(".contentBox").each(function () {
+    const elem = d3.select(this);
+    if (elem.attr("d")) {
+      seg = getArrowPos(elem.attr("d"));
+      elemX = seg[0];
+      elemY = seg[1];
+      elemWidth = Math.abs(seg[0] - seg[2]);
+      elemHeight = Math.abs(seg[1] - seg[3]);
+    }
+    // 図形の位置とサイズを取得
+    const bbox = elem.node().getBBox();
+    const elemX = bbox.x;
+    const elemY = bbox.y;
+    const elemWidth = bbox.width;
+    const elemHeight = bbox.height;
+    // 最小のX座標とY座標を更新
+    minX = Math.min(minX, elemX);
+    minY = Math.min(minY, elemY);
+
+    // 最大のX座標とY座標を更新
+    maxX = Math.max(maxX, elemX + elemWidth);
+    maxY = Math.max(maxY, elemY + elemHeight);
+  });
+
+  // 最小の矩形の位置とサイズを設定
   const frame = group.select(".group_frame");
-  console.log(frame.node());
-  const r = frame.node().parentNode.getBoundingClientRect();
-  const margin = 10;
-  const frameX = r.x;
-  const frameY = r.y;
-  const frameW = r.width;
-  const frameH = r.height;
-  //フレームの上下左右の余白
-  
   frame
-    .attr("x", frameX )
-    .attr("y", frameY )
-    .attr("width", frameW)
-    .attr("height", frameH);
+    .attr("x", minX)
+    .attr("y", minY)
+    .attr("width", maxX - minX)
+    .attr("height", maxY - minY);
 }
 
 //要素の属性を一括で設定する

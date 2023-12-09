@@ -17,14 +17,14 @@ function displayToRect() {
     .append("rect")
     .attr("id", "contentBox" + count)
     .attr("class", "contentBox")
-    .attr("fill","white")
-    .attr("stroke","black")
+    .attr("fill", "white")
+    .attr("stroke", "black")
     .attr("x", event.x - width / 2)
     .attr("y", event.y - height / 2)
     .attr("width", width)
     .attr("height", height);
   //ドラッグ可能にする
-  rectDragEvent(rect);
+  shapeDragEvent(rect);
   count++;
 }
 
@@ -34,53 +34,69 @@ function displayToCircle() {
   const circle = svg
     .append("circle")
     .attr("id", "contentBox" + count)
-    .attr("class", "contentBox")
-    .attr("fill","white")
-    .attr("stroke","black")
+    .attr("class", "contentBox circle")
+    .attr("fill", "white")
+    .attr("stroke", "black")
     .attr("cx", event.x)
     .attr("cy", event.y)
     .attr("r", r);
   //ドラッグ可能にする
-   rectDragEvent(circle);
+  shapeDragEvent(circle);
   count++;
 }
 
-function rectDragEvent(shape) {
-  //テキストボックスのイベント登録
+//矢印の座標を取得する
+function getArrowPos(segs) {
+  const words = segs.split(" ");
+  const result = { x: 0, y: 0, endX: 0, endY: 0 };
+result.x = Number(words[1]);
+result.y = Number(words[2]);
+result.endX = Number(words[4]);
+result.endY = Number(words[5]);
+  return result;
+}
+
+//図形のイベント登録
+function shapeDragEvent(shape) {
   const start = (event, d) => {
-    const posX =shape.attr("x");
-    if(shape.attr("x")) {
-      dx = Math.abs(Number(shape.attr("x") - event.x));
-      dy = Math.abs(Number(shape.attr("y") - event.y));
-    }else {
+    debugFunc(shape.attr("id"));
+
+    if (shape.attr("cx")) {
       dx = Math.abs(Number(shape.attr("cx") - event.x));
       dy = Math.abs(Number(shape.attr("cy") - event.y));
+    } else {
+      dx = Math.abs(Number(shape.attr("x") - event.x));
+      dy = Math.abs(Number(shape.attr("y") - event.y));
     }
-    
   };
 
   const drag = (event, d) => {
-
-    if(shape.attr("x")) {
-      shape.attr("x", event.x - dx).attr("y", event.y - dy);
-    }else {
-      shape.attr("cx", event.x - dx/2).attr("cy", event.y - dy/2);
+    if (shape.attr("cx")) {
+      shape.attr("cx", event.x - dx).attr("cy", event.y - dy);
+    } else {
+      shape.attr("x", event.x - dx / 2).attr("y", event.y - dy / 2);
     }
-    
+  };
+
+  const end = () => {
+    const groupId = shape.node().parentNode.id;
+    const group = d3.select("#" + groupId);
+    //グループ図形（矢印以外）は枠の大きさを変更する
+    if (!group.empty()) {
+      setFrameSize(group);
+    }
   };
   //テキストボックスのドラッグ時の処理
-  shape.call(d3.drag().on("start", start).on("drag", drag));
+  shape.call(d3.drag().on("start", start).on("drag", drag).on("end", end));
 }
 
 //矢印を描画する
-function arrow() {
+function displayToArrow() {
   const svg = d3.select("#svg");
-  //矢印の描画
   let moveFlag = false;
   let tmpX, tmpY;
   let arrow_endX, arrow_endY;
 
-  // マウスダウンイベント
   svg.call(
     d3
       .drag()
@@ -89,48 +105,30 @@ function arrow() {
           return false;
         }
 
-        // <path d="M 146 343 L 283 296" id="contentBox0" stroke="black" strokeWeight="1" class="arrow" marker-end="url(#m_atr)"><g style="blue" stroke="black" strokeWeight="2" id="groupObj0" class="groupObj contentBox"><rect class="contentBox" x="146" y="296" width="137" height="47" fill="white" opacity="0.7" strokeWidth="1" stroke="black"></rect></g></path>
-        const num = (segs) => {
-          const words = segs.split(" ");
-          const result = { x: 0, y: 0, endX: 0, endY: 0 };
-
-          for (let i = 0; i < words.length; i++) {
-            if (words[i] == "M") {
-              result.x = words[i + 1];
-              result.x = words[i + 2];
-              i += 2;
-            } else if (words[i] == "L") {
-              result.endX = words[i + 1];
-              result.endY = words[i + 2];
-              return result;
-            }
-          }
-        };
-
-        // ページの端から、要素の端までの距離
         tmpX = event.x;
         tmpY = event.y;
-        /*         const groupObj = event.sourceEvent.target;
-        console.log(groupObj);
-        //グループ化された図形
-        if (groupObj.classList[0] == "groupObj") {
-          const groupFrame = d3
-            .select("#" + groupObj.id)
-            .select(".group_frame");
-          tmpX =
-            Number(groupFrame.getAttribute("x")) +
-            Number(groupFrame.getAttribute("width"));
-          tmpY = Number(groupFrame.getAttribute("width")) / 2;
-        } */
-
-        //矢印の終点の距離
         arrow_endX = tmpX;
         arrow_endY = tmpY;
-        console.log(event.x);
-        const segs =
-          "M" + " " + tmpX + " " + tmpY + " L " + arrow_endX + " " + arrow_endY;
 
-        svg
+        const segs =
+          "M " + tmpX + " " + tmpY + " L " + arrow_endX + " " + arrow_endY;
+        const group = svg
+          .append("g")
+          .attr("style", "blue")
+          .attr("stroke", "black")
+          .attr("strokeWeight", 2)
+          .attr("id", "groupObj" + groupCnt)
+          .attr("class", "groupObj contentBox");
+
+        group
+          .append("rect")
+          .attr("class", "group_frame")
+          .attr("fill", "white")
+          .attr("opacity", 0.7)
+          .attr("strokeWidth", 1)
+          .attr("stroke", "black");
+
+        group
           .append("path")
           .attr("d", segs)
           .attr("id", "contentBox" + count)
@@ -138,70 +136,58 @@ function arrow() {
           .attr("strokeWeight", 1)
           .attr("class", "arrow")
           .attr("marker-end", "url(#m_atr)");
+
         moveFlag = true;
       })
       .on("drag", (event, d) => {
+        if (drawMode != "arrow") return false;
         if (moveFlag) {
           arrow_endX = event.x;
           arrow_endY = event.y;
           const arrow = d3.select("#contentBox" + count);
           const segs =
             "M " + tmpX + " " + tmpY + " L " + arrow_endX + " " + arrow_endY;
-          // <path d="M 146 343 L 283 296" id="contentBox0" stroke="black" strokeWeight="1" class="arrow" marker-end="url(#m_atr)"><g style="blue" stroke="black" strokeWeight="2" id="groupObj0" class="groupObj contentBox"><rect class="contentBox" x="146" y="296" width="137" height="47" fill="white" opacity="0.7" strokeWidth="1" stroke="black"></rect></g></path>
-          const num = (segs) => {
-            const words = segs.split(" ");
-            const result = { x: 0, y: 0, endX: 0, endY: 0 };
-
-            for (let i = 0; i < words.length; i++) {
-              if (words[i] == "M") {
-                result.x = words[i + 1];
-                result.x = words[i + 2];
-                i += 2;
-              } else if (words[i] == "L") {
-                result.endX = words[i + 1];
-                result.endY = words[i + 2];
-                return result;
-              }
-            }
-          };
-
           arrow.attr("d", segs);
-          /*  console.log("tmpX: "+tmpX);
-            console.log("tmpY: "+tmpY);
-            console.log("endX: "+arrow_endX);
-            console.log("endY: "+arrow_endY); */
+
+          //矢印の枠の設定
+          const group = d3.select("#" + arrow.node().parentNode.id);
+          const x = Math.min(tmpX, arrow_endX);
+          const y = Math.min(tmpY, arrow_endY);
+          const width = Math.abs(arrow_endX - tmpX);
+          const height = Math.abs(arrow_endY - tmpY);
+          group
+            .select(".group_frame")
+            .attr("x", x)
+            .attr("y", y)
+            .attr("width", width)
+            .attr("height", height)
+            .attr("fill", "white")
+            .attr("opacity", 0.7)
+            .attr("strokeWidth", 1)
+            .attr("stroke", "black");
         }
       })
       .on("end", () => {
-        // マウスアップイベント
-        // 矢印の周りに枠を作成する
-        const group = svg
-          .select("#contentBox" + count)
-          .append("g")
-          .attr("style", "blue")
-          .attr("stroke", "black")
-          .attr("strokeWeight", 2)
-          .attr("id", "groupObj" + groupCnt)
-          .attr("class", "groupObj contentBox");
-        const arrow = d3.select("#contentBox" + count);
+        if (drawMode != "arrow") {
+          return false;
+        }
+        const group = svg.select("#groupObj" + groupCnt);
         const x = Math.min(tmpX, arrow_endX);
         const y = Math.min(tmpY, arrow_endY);
-        const endX = Math.max(tmpX, arrow_endX);
-        const endY = Math.max(tmpY, arrow_endY);
+        const width = Math.abs(arrow_endX - tmpX);
+        const height = Math.abs(arrow_endY - tmpY);
 
         group
-          .append("rect")
-          .attr("class", "contentBox")
+          .select(".group_frame")
           .attr("x", x)
           .attr("y", y)
-          .attr("width", endX - x)
-          .attr("height", endY - y)
-          .attr("fill", "white")
-          .attr("opacity", 0.7)
-          .attr("strokeWidth", 1)
-          .attr("stroke", "black");
-
+          .attr("width", width)
+          .attr("height", height)
+          .attr("opacity", 0);
+        shapeDragEvent(group);
+        groupEvent(group);
         moveFlag = false;
+        groupCnt++;
         count++;
       })
   );
@@ -239,7 +225,7 @@ function displayToTextbox(e) {
 //テキストボックスのイベント登録
 function textBoxMouseEvent(textbox) {
   //ドラッグ可能にする
-  rectDragEvent(textbox);
+  shapeDragEvent(textbox);
   const div = textbox.node().firstChild;
   const svg = document.querySelector("#svg");
 
@@ -253,15 +239,15 @@ function textBoxMouseEvent(textbox) {
 
   textbox.on("dblclick", (event, d) => {
     //図形の始点とマウス座標までの距離
-    dx = event.sourceEvent.offsetX;
-    dy = event.sourceEvent.offsetY;
+    dx = event.dx;
+    dy = event.dx;
     console.log(dx);
     if (drawMode == "textbox") {
       div.style.cursor = "auto";
       div.setAttribute("contenteditable", true);
       div.focus();
       //テキストボックスのドラッグ時の処理
-      rectDragEvent(textbox);
+      shapeDragEvent(textbox);
     } else {
       div.style.cursor = "auto";
       div.setAttribute("contenteditable", false);
@@ -337,7 +323,7 @@ function uploadImg(x, y) {
       .attr("y", y);
 
     //ドラッグ可能にする
-    rectDragEvent(image);
+    shapeDragEvent(image);
 
     svg.removeChild(foreignObject);
     svg.appendChild(image.node());

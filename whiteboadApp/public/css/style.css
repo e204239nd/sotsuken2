@@ -39,6 +39,10 @@ aside {
   background-color: rgb(56, 190, 211);
 }
 
+aside.view {
+  
+}
+
 /* .box {
   background-color: black;
   width: 70px;
