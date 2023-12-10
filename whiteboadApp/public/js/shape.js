@@ -8,7 +8,7 @@ let edit = false;
 //基本図形の描画
 let dx = 0;
 let dy = 0;
-
+// 四角の描画
 function displayToRect() {
   const svg = d3.select("#svg");
   const width = 100;
@@ -28,6 +28,7 @@ function displayToRect() {
   count++;
 }
 
+// 円の描画
 function displayToCircle() {
   const svg = d3.select("#svg");
   const r = 50;
@@ -49,58 +50,23 @@ function displayToCircle() {
 function getArrowPos(segs) {
   const words = segs.split(" ");
   const result = { x: 0, y: 0, endX: 0, endY: 0 };
-result.x = Number(words[1]);
-result.y = Number(words[2]);
-result.endX = Number(words[4]);
-result.endY = Number(words[5]);
+  result.x = Number(words[1]);
+  result.y = Number(words[2]);
+  result.endX = Number(words[4]);
+  result.endY = Number(words[5]);
   return result;
 }
-
-//図形のイベント登録
-function shapeDragEvent(shape) {
-  const start = (event, d) => {
-    debugFunc(shape.attr("id"));
-
-    if (shape.attr("cx")) {
-      dx = Math.abs(Number(shape.attr("cx") - event.x));
-      dy = Math.abs(Number(shape.attr("cy") - event.y));
-    } else {
-      dx = Math.abs(Number(shape.attr("x") - event.x));
-      dy = Math.abs(Number(shape.attr("y") - event.y));
-    }
-  };
-
-  const drag = (event, d) => {
-    if (shape.attr("cx")) {
-      shape.attr("cx", event.x - dx).attr("cy", event.y - dy);
-    } else {
-      shape.attr("x", event.x - dx / 2).attr("y", event.y - dy / 2);
-    }
-  };
-
-  const end = () => {
-    const groupId = shape.node().parentNode.id;
-    const group = d3.select("#" + groupId);
-    //グループ図形（矢印以外）は枠の大きさを変更する
-    if (!group.empty()) {
-      setFrameSize(group);
-    }
-  };
-  //テキストボックスのドラッグ時の処理
-  shape.call(d3.drag().on("start", start).on("drag", drag).on("end", end));
-}
-
 //矢印を描画する
 function displayToArrow() {
   const svg = d3.select("#svg");
   let moveFlag = false;
   let tmpX, tmpY;
   let arrow_endX, arrow_endY;
-
+let arrowCnt;
   svg.call(
     d3
       .drag()
-      .on("start", (event, d) => {
+      .on("start", (event) => {
         if (drawMode != "arrow") {
           return false;
         }
@@ -112,26 +78,29 @@ function displayToArrow() {
 
         const segs =
           "M " + tmpX + " " + tmpY + " L " + arrow_endX + " " + arrow_endY;
+
+        //矢印のg要素
         const group = svg
           .append("g")
           .attr("style", "blue")
           .attr("stroke", "black")
           .attr("strokeWeight", 2)
-          .attr("id", "groupObj" + groupCnt)
+          .attr("id", "contentBox" + count)
           .attr("class", "groupObj contentBox");
 
+        // 矢印を囲む枠
         group
           .append("rect")
-          .attr("class", "group_frame")
+          .attr("class", "arrow_frame")
           .attr("fill", "white")
           .attr("opacity", 0.7)
           .attr("strokeWidth", 1)
           .attr("stroke", "black");
 
+        // 矢印
         group
           .append("path")
           .attr("d", segs)
-          .attr("id", "contentBox" + count)
           .attr("stroke", "black")
           .attr("strokeWeight", 1)
           .attr("class", "arrow")
@@ -139,24 +108,24 @@ function displayToArrow() {
 
         moveFlag = true;
       })
-      .on("drag", (event, d) => {
+      .on("drag", (event) => {
         if (drawMode != "arrow") return false;
         if (moveFlag) {
           arrow_endX = event.x;
           arrow_endY = event.y;
-          const arrow = d3.select("#contentBox" + count);
+          const group = d3.select("#contentBox" + count);
+          const arrow = group.select(".arrow");
           const segs =
             "M " + tmpX + " " + tmpY + " L " + arrow_endX + " " + arrow_endY;
           arrow.attr("d", segs);
 
           //矢印の枠の設定
-          const group = d3.select("#" + arrow.node().parentNode.id);
+          const arrow_frame = group.select(".arrow_frame");
           const x = Math.min(tmpX, arrow_endX);
           const y = Math.min(tmpY, arrow_endY);
           const width = Math.abs(arrow_endX - tmpX);
           const height = Math.abs(arrow_endY - tmpY);
-          group
-            .select(".group_frame")
+          arrow_frame
             .attr("x", x)
             .attr("y", y)
             .attr("width", width)
@@ -171,26 +140,68 @@ function displayToArrow() {
         if (drawMode != "arrow") {
           return false;
         }
-        const group = svg.select("#groupObj" + groupCnt);
+        const group = d3.select("#contentBox"+count);
+        const arrow_frame = group.select(".arrow_frame");
         const x = Math.min(tmpX, arrow_endX);
         const y = Math.min(tmpY, arrow_endY);
         const width = Math.abs(arrow_endX - tmpX);
         const height = Math.abs(arrow_endY - tmpY);
 
-        group
-          .select(".group_frame")
+        //矢印の枠を設定する
+        arrow_frame
           .attr("x", x)
           .attr("y", y)
           .attr("width", width)
           .attr("height", height)
-          .attr("opacity", 0);
-        shapeDragEvent(group);
-        groupEvent(group);
+          .attr("opacity", 0.7);
+        arrowMouseEvent(group);
         moveFlag = false;
         groupCnt++;
         count++;
       })
   );
+}
+
+//矢印のマウスイベント登録
+function arrowMouseEvent(arrow) {
+  const drag = (event) => {
+    //矢印の移動：矢印が移動しない
+    //現時点の矢印の始点と終点の座標
+    const seg = getArrowPos(arrow.select(".arrow").attr("d"));
+    const x = seg.x + event.dx;
+    const y = seg.y + event.dy;
+    const d = `M ${x} ${y} L ${seg.endX + event.dx} ${seg.endY + event.dy}`;
+    arrow.select(".arrow").attr("d", d);
+    arrow
+      .select(".arrow_frame")
+      .attr("x", Number(arrow.select(".arrow_frame").attr("x")) + event.dx)
+      .attr("y", Number(arrow.select(".arrow_frame").attr("y")) + event.dy);
+  };
+
+  //グループをドラッグした時の処理
+  arrow.call(d3.drag().on("drag", drag));
+
+  //矢印の枠
+  const frame = arrow.select(".arrow_frame");
+  //ダブルクリックした時の処理
+  arrow.on("dblclick", () => {
+    //グループ化の枠を表示する
+    frame.attr("opacity", 0.7);
+    arrow.call(
+      d3
+        .drag()
+        .on("drag", drag)
+        .on("end", () => {})
+    );
+  });
+
+  //図形の外をクリックした際の処理
+  svg.addEventListener("click", (e) => {
+    frame.attr("opacity", 0);
+    arrow.call(d3.drag().on("drag", null));
+  });
+
+  clickEventHundler(arrow.node());
 }
 
 //画像・文章の描画
@@ -237,7 +248,7 @@ function textBoxMouseEvent(textbox) {
     textbox.call(d3.drag().on("start", null).on("drag", null));
   });
 
-  textbox.on("dblclick", (event, d) => {
+  textbox.on("dblclick", (event) => {
     //図形の始点とマウス座標までの距離
     dx = event.dx;
     dy = event.dx;
@@ -324,7 +335,6 @@ function uploadImg(x, y) {
 
     //ドラッグ可能にする
     shapeDragEvent(image);
-
     svg.removeChild(foreignObject);
     svg.appendChild(image.node());
   };

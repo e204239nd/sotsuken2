@@ -15,13 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
   circle_menu.addEventListener("dragstart", () => (drawMode = "circle"));
   circle_menu.addEventListener("dragend", displayToCircle);  
   displayToArrow();
-
   mutationOberver();
   const svg = document.querySelector("#svg");
 
   svg.addEventListener("click", () => {
     //コンテキストメニューを削除する
     debugFunc(drawMode);
+    drawMode="";
     const contextMenu = document.querySelector("#contextMenu");
     if (contextMenu) contextMenu.parentNode.removeChild(contextMenu);
   });
