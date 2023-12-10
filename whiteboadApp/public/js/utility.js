@@ -54,8 +54,6 @@ function setFrameSize(group) {
   //図形のイベント登録
 function shapeDragEvent(shape) {
     const start = (event) => {
-      debugFunc(shape.attr("id"));
-  
       if (shape.attr("cx")) {
         dx = Math.abs(Number(shape.attr("cx") - event.x));
         dy = Math.abs(Number(shape.attr("cy") - event.y));
@@ -73,13 +71,8 @@ function shapeDragEvent(shape) {
       }
     };
   
-    const end = () => {
-      //グループ図形（矢印以外）は枠の大きさを変更する
-
-      // setFrameSize(arrow);
-    };
     //テキストボックスのドラッグ時の処理
-    shape.call(d3.drag().on("start", start).on("drag", drag).on("end", end));
+    shape.call(d3.drag().on("start", start).on("drag", drag));
   }
 
   // 図形クリック時の処理

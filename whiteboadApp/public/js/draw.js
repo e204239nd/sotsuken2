@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
   svg.addEventListener("click", () => {
     //コンテキストメニューを削除する
     debugFunc(drawMode);
-    drawMode="";
+    
     const contextMenu = document.querySelector("#contextMenu");
     if (contextMenu) contextMenu.parentNode.removeChild(contextMenu);
   });

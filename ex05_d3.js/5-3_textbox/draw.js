@@ -83,7 +83,7 @@ function displayToTextbox(e) {
     // dx = e.offsetY;
     if (drawMode == "textbox") {
       div.style.cursor = "auto"
-      
+      div.focus();
     } else {
       textbox.call(d3.drag().on("drag", null));
       div.style.cursor = "auto";

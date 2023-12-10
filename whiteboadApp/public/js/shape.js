@@ -62,7 +62,7 @@ function displayToArrow() {
   let moveFlag = false;
   let tmpX, tmpY;
   let arrow_endX, arrow_endY;
-let arrowCnt;
+  let arrowCnt;
   svg.call(
     d3
       .drag()
@@ -140,7 +140,7 @@ let arrowCnt;
         if (drawMode != "arrow") {
           return false;
         }
-        const group = d3.select("#contentBox"+count);
+        const group = d3.select("#contentBox" + count);
         const arrow_frame = group.select(".arrow_frame");
         const x = Math.min(tmpX, arrow_endX);
         const y = Math.min(tmpY, arrow_endY);
@@ -228,7 +228,7 @@ function displayToTextbox(e) {
   div.textContent = " ";
   foreignObject.appendChild(div);
   svg.appendChild(foreignObject);
-  const textbox = d3.select("#contentBox" + count);
+  const textbox = d3.select("#"+foreignObject.id);
   textBoxMouseEvent(textbox);
   count++;
 }
@@ -236,24 +236,24 @@ function displayToTextbox(e) {
 //テキストボックスのイベント登録
 function textBoxMouseEvent(textbox) {
   //ドラッグ可能にする
-  shapeDragEvent(textbox);
-  const div = textbox.node().firstChild;
-  const svg = document.querySelector("#svg");
-
+  const svg = d3.select("#svg");
+  const div = textbox.select("div").node();
   //図形の外の領域をクリック
-  svg.addEventListener("click", (e) => {
+  svg.on("click", (e) => {
     if (e.target.id != "svg") return;
     IsClickArray = [];
     div.style.cursor = "default";
     textbox.call(d3.drag().on("start", null).on("drag", null));
   });
 
+  //ダブルクリックされた時の処理
   textbox.on("dblclick", (event) => {
     //図形の始点とマウス座標までの距離
     dx = event.dx;
     dy = event.dx;
-    console.log(dx);
+
     if (drawMode == "textbox") {
+      console.log(div);
       div.style.cursor = "auto";
       div.setAttribute("contenteditable", true);
       div.focus();
@@ -262,12 +262,12 @@ function textBoxMouseEvent(textbox) {
     } else {
       div.style.cursor = "auto";
       div.setAttribute("contenteditable", false);
+      //クリックされたときに編集状態に変更
       drawMode = "textbox";
     }
     //ドラッグの無効化
   });
-  // foreignObject.addEventListener("click")
-  //クリックされたときに編集状態に変更
+  shapeDragEvent(textbox);
 }
 
 //画像を挿入するための図形を表示する
