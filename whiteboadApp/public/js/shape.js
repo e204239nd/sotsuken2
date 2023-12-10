@@ -62,7 +62,6 @@ function displayToArrow() {
   let moveFlag = false;
   let tmpX, tmpY;
   let arrow_endX, arrow_endY;
-  let arrowCnt;
   svg.call(
     d3
       .drag()
