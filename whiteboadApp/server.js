@@ -46,7 +46,7 @@ app.post("/update", (req, res) => {
   req.json({ message: "ホワイトボードの保存が成功しました！" });
 });
 
-app.listen(3000, () => {
+app.listen(3001, () => {
   console.log("サーバが起動");
 });
 

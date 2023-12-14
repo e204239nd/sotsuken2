@@ -1,3 +1,4 @@
+//グループ図形関係の処理
 //選択図形を格納する配列
 let IsClickArray;
 let groupCnt = 0;
@@ -47,7 +48,7 @@ function displayContextMenu(contentBox) {
         .attr("class", "groupObj contentBox");
 
       //グループを囲むフレーム（枠）の追加
-      group
+      const frame = group
         .append("rect")
         .attr("class", "group_frame")
         .attr("x", 0)
@@ -59,15 +60,18 @@ function displayContextMenu(contentBox) {
         .attr("strokeWidth", 1)
         .attr("stroke", "black");
       //選択した図形をグループに追加する
-      console.log(IsClickArray);
       for (let i = 0; i < IsClickArray.length; i++) {
         const clickedElem = d3.select("#" + IsClickArray[i]);
         //グループに追加
         group.append(() => clickedElem.node());
       }
-      groupMouseEvent(group); //グループ図形にマウスイベントを登録する
+
+      //グループ図形にマウスイベントを登録する
+      groupMouseEvent(group); 
+
+      //コンテキストメニューを閉じる
       const removeMenu = contextMenu.parentNode;
-      svg.removeChild(removeMenu); //コンテキストメニューを閉じる
+      svg.removeChild(removeMenu); 
       IsClickArray = [];
       groupCnt++;
     });
@@ -80,11 +84,14 @@ function groupMouseEvent(group) {
     const dx = event.dx;
     const dy = event.dy;
     const elems = group.selectAll(".contentBox");
+    
+    
     //グループ内のそれぞれの図形に対してドラッグイベントを付与する
-    //矢印の移動：矢印が移動しない
     elems.each(function (p, j) {
       const elem = d3.select(this);
       const cx = elem.attr("cx");
+      
+//グループが移動したときに接続された矢印の始点を合わせてずらす
 
       //矢印の移動
       if (!elem.select(".arrow_frame").empty()) {
@@ -132,11 +139,10 @@ function groupMouseEvent(group) {
     d3
       .drag()
       .on("drag", drag)
-      .on("end", () => {
-        setFrameSize(group);
-      })
+      .on("end", () => setFrameSize(group))
   );
 
+  
   const frame = group.select(".group_frame");
   //ダブルクリックした時の処理
   group.on("dblclick", () => {
@@ -195,8 +201,4 @@ function mutationOberver() {
   observer.observe(targetNode, config);
 }
 
-// デバッグ画面を表示
-function debugFunc(str) {
-  const debugTxt = document.querySelector("#debug");
-  debugTxt.textContent = str;
-}
+

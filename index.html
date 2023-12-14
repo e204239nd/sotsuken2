@@ -1,6 +1,103 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<html lang="ja"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/hamburgers/1.1.3/hamburgers.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <title>ホワイトボードアプリ</title>
+  </head>
+  <body style="background-color: skyblue;" oncontextmenu="return false">
+    <div id="helo">
+    <!-- メニュー -->
+    <aside style="background-color: white; width:50px;">
+      <div onclick="document.querySelector('#helo').removeChild(document.querySelector('#helo #svg'))" class="hamburger hamburger--slider js-hamburger">
+        <div class="hamburger-box">
+          <div class="hamburger-inner"></div>
+        </div>
+      </div>
 
-    <path d="M 23 19 a 2 2 0 0 1 -2 2 h -18 a 2 2 0 0 1 -2 -2 v -11 a 2 2 0 0 1 2 -2 h 4 l 2 -3 h 6 l 2 3 h 4 a 2 2 0 0 1 2 2 z"> </path>
+      
+
+      <div class="box">
+      <img id="textBox_menu" src="./image/シンプルな書類ファイル.svg" draggable="true" alt="">
+      </div>
+      
+      <div class="box">
+      <img id="imgBox_menu" src="./image/イメージ画像のアイコン素材.svg" alt="" draggable="true">
+      </div>
+
+      <div class="box">
+      <img id="rect_menu" src="./image/しかくのアイコン.svg" alt="" draggable="true">
+      </div>
+
+      <div class="box">
+       <img id="circle_menu" width="50px" height="50px" draggable="true" src="./image/まるのアイコン.svg" alt="">
+      </div>
+
+      <div class="box">
+        <img id="arrow_menu" src="./image/矢印アイコン　右2.svg" draggable="true" alt="">
+
+      </div>
+    </aside>
     
+
+    <!--　保存読み込みボタン
+       <form id="form1" style="margin:10px 0">
+      <input type="submit" id="update" value="保存"></input>
+    </form>
+    <form id="form2">
+      <input type="submit" id="read" value="読込み"></input>
+    </form>
+<button style="margin-top: 10px;" id="btn">図形表示</button> -->
     
-    </svg>
+      <p style="position:absolute; margin-left:50px;" id="debug">imgbox</p>      
+      <svg id="svg" xlns="http://www.w3.org/2000/svg" width="1000px" height="1000px" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);">
+        <defs>
+          <marker id="m_atr" markerUnits="strokeWidth" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+            <polygon points="0,0 5,5 0,10 10,5 " fill="black"></polygon>
+          </marker>
+        </defs>
+        
+        <!-- <g>
+          <rect class="group_frame" x="20" y="0" width="50" height="100" opcity="0" fill="white" opacity="0.7" strokeWidth="1" stroke="black"></rect>
+        <foreignObject id="contentBox0" class="contentBox" x="20" y="0" width="30" height="100">
+          <div contenteditable="true"> </div>
+          </foreignObject>
+        <foreignObject id="contentBox1" class="contentBox" x="50" y="0" width="30" height="100">
+          <div contenteditable="true"> </div>
+          </foreignObject>
+        </g> -->
+        
+        <!-- テキストボックスメニュー -->
+        <!-- <foreignObject id="contentBox0" class="content" x="160" y="100" width="100" height="100"><div contenteditable="true"> </div></foreignObject> -->
+
+        <!-- 画像描画メニュー -->
+        <!-- <foreignObject id="contentBox0" class="content" x="188" y="324" width="100" height="100"><div class="contentBox"><form id="form0">
+          <input id="input0" type="file" style="margin-bottom:15px;  accept=" image="" *"="">
+          <input type="submit">
+        </form></div></foreignObject> -->
+        
+</svg>
+    <script src="js/utility.js"></script>
+    <script src="js/group.js"></script>
+    <script src="js/shape.js"></script>
+    <script src="js/draw.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+      /**
+    hamburgerアニメーションコード
+       **/
+        /* var forEach=function(t,o,r){if("[object Object]"===Object.prototype.toString.call(t))for(var c in t)Object.prototype.hasOwnProperty.call(t,c)&&o.call(r,t[c],c,t);else for(var e=0,l=t.length;l>e;e++)o.call(r,t[e],e,t)};
+        var hamburgers = document.querySelectorAll(".hamburger");
+        if (hamburgers.length > 0) {
+          forEach(hamburgers, function(hamburger) {
+            hamburger.addEventListener("click", function() {
+              this.classList.toggle("is-active");
+            }, false);
+          });
+        } */
+      </script>
+  
+
+</body>
+</html>

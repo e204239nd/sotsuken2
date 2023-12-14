@@ -1,10 +1,8 @@
-const svg = document.getElementById("svg");
+//図形の描画を行う
 
 let count = 0;
 //描画モード切り替え用
 let drawMode = "";
-//編集状態
-let edit = false;
 //基本図形の描画
 let dx = 0;
 let dy = 0;
@@ -23,10 +21,13 @@ function displayToRect() {
     .attr("y", event.y - height / 2)
     .attr("width", width)
     .attr("height", height);
+
   //ドラッグ可能にする
   shapeDragEvent(rect);
   count++;
 }
+
+
 
 // 円の描画
 function displayToCircle() {
@@ -60,106 +61,162 @@ function getArrowPos(segs) {
 function displayToArrow() {
   const svg = d3.select("#svg");
   let moveFlag = false;
-  let tmpX, tmpY;
+  let arrow_startX, arrow_startY;
   let arrow_endX, arrow_endY;
-  svg.call(
-    d3
-      .drag()
-      .on("start", (event) => {
-        if (drawMode != "arrow") {
-          return false;
-        }
+  //グループ化図形の矢印を接続するための変数
+  let selectedArrowHundle = "";
+  const start = (event) => {
+    if (drawMode != "arrow") {
+      return false;
+    }
 
-        tmpX = event.x;
-        tmpY = event.y;
-        arrow_endX = tmpX;
-        arrow_endY = tmpY;
+    arrow_startX = event.x;
+    arrow_startY = event.y;
+    // 矢印のハンドル上でドラッグしたとき
 
-        const segs =
-          "M " + tmpX + " " + tmpY + " L " + arrow_endX + " " + arrow_endY;
+    if (event.sourceEvent.target.classList[0] == "arrow-hundle") {
+      //ハンドルを始点に矢印を接続する
+      const arrow_hundle = d3.select("#" + event.sourceEvent.target.id);
+      selectedArrowHundle = arrow_hundle.attr("id");
+      arrow_startX = arrow_hundle.attr("cx");
+      arrow_startY = arrow_hundle.attr("cy");
+      arrow_hundle.attr("fill", "blue");
+      // 別のグループの時だけ接続した判定にする（青くする）
+    }
 
-        //矢印のg要素
-        const group = svg
-          .append("g")
-          .attr("style", "blue")
-          .attr("stroke", "black")
-          .attr("strokeWeight", 2)
-          .attr("id", "contentBox" + count)
-          .attr("class", "groupObj contentBox");
+    arrow_endX = arrow_startX;
+    arrow_endY = arrow_startY;
 
-        // 矢印を囲む枠
-        group
-          .append("rect")
-          .attr("class", "arrow_frame")
-          .attr("fill", "white")
-          .attr("opacity", 0.7)
-          .attr("strokeWidth", 1)
-          .attr("stroke", "black");
+    const segs =
+      "M " +
+      arrow_startX +
+      " " +
+      arrow_startY +
+      " L " +
+      arrow_endX +
+      " " +
+      arrow_endY;
+    //矢印グループ
+    const arrow_group = svg
+      .append("g")
+      .attr("stroke", "black")
+      .attr("strokeWeight", 2)
+      .attr("id", "contentBox" + count)
+      .attr("class", "groupObj contentBox");
 
-        // 矢印
-        group
-          .append("path")
-          .attr("d", segs)
-          .attr("stroke", "black")
-          .attr("strokeWeight", 1)
-          .attr("class", "arrow")
-          .attr("marker-end", "url(#m_atr)");
+    // 矢印を囲む枠
+    const rect = arrow_group
+      .append("rect")
+      .attr("class", "arrow_frame")
+      .attr("fill", "white")
+      .attr("opacity", 0.7)
+      .attr("strokeWidth", 1)
+      .attr("stroke", "black");
 
-        moveFlag = true;
-      })
-      .on("drag", (event) => {
-        if (drawMode != "arrow") return false;
-        if (moveFlag) {
-          arrow_endX = event.x;
-          arrow_endY = event.y;
-          const group = d3.select("#contentBox" + count);
-          const arrow = group.select(".arrow");
-          const segs =
-            "M " + tmpX + " " + tmpY + " L " + arrow_endX + " " + arrow_endY;
-          arrow.attr("d", segs);
+    // 矢印
+    const arrow = arrow_group
+      .append("path")
+      .attr("d", segs)
+      .attr("stroke", "black")
+      .attr("strokeWeight", 1)
+      .attr("class", "arrow")
+      .attr("marker-end", "url(#m_atr)");
 
-          //矢印の枠の設定
-          const arrow_frame = group.select(".arrow_frame");
-          const x = Math.min(tmpX, arrow_endX);
-          const y = Math.min(tmpY, arrow_endY);
-          const width = Math.abs(arrow_endX - tmpX);
-          const height = Math.abs(arrow_endY - tmpY);
-          arrow_frame
-            .attr("x", x)
-            .attr("y", y)
-            .attr("width", width)
-            .attr("height", height)
-            .attr("fill", "white")
-            .attr("opacity", 0.7)
-            .attr("strokeWidth", 1)
-            .attr("stroke", "black");
-        }
-      })
-      .on("end", () => {
-        if (drawMode != "arrow") {
-          return false;
-        }
-        const group = d3.select("#contentBox" + count);
-        const arrow_frame = group.select(".arrow_frame");
-        const x = Math.min(tmpX, arrow_endX);
-        const y = Math.min(tmpY, arrow_endY);
-        const width = Math.abs(arrow_endX - tmpX);
-        const height = Math.abs(arrow_endY - tmpY);
+    //ハンドルが 矢印ハンドルのidを矢印のクラスに付与する
+    if (selectedArrowHundle) {
+      arrow_group.classed(selectedArrowHundle + "-start");
+    }
+    moveFlag = true;
+  };
 
-        //矢印の枠を設定する
-        arrow_frame
-          .attr("x", x)
-          .attr("y", y)
-          .attr("width", width)
-          .attr("height", height)
-          .attr("opacity", 0.7);
-        arrowMouseEvent(group);
-        moveFlag = false;
-        groupCnt++;
-        count++;
-      })
-  );
+  const drag = (event) => {
+    if (drawMode != "arrow") return false;
+    if (moveFlag) {
+      // 終点の座標は、矢印が同じ座標にあるとハンドルが認識されないため-1している
+      arrow_endX = event.x - 1;
+      arrow_endY = event.y - 1;
+      const arrow_group = d3.select("#contentBox" + count);
+      const arrow = arrow_group.select(".arrow");
+      const segs =
+        "M " +
+        arrow_startX +
+        " " +
+        arrow_startY +
+        " L " +
+        arrow_endX +
+        " " +
+        arrow_endY;
+      arrow.attr("d", segs);
+
+      //矢印の枠の設定
+      const arrow_frame = arrow_group.select(".arrow_frame");
+      const x = Math.min(arrow_startX, arrow_endX);
+      const y = Math.min(arrow_startY, arrow_endY);
+      const width = Math.abs(arrow_endX - arrow_startX);
+      const height = Math.abs(arrow_endY - arrow_startY);
+      arrow_frame
+        .attr("x", x)
+        .attr("y", y)
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", "white")
+        .attr("opacity", 0.7)
+        .attr("strokeWidth", 1)
+        .attr("stroke", "black");
+    }
+  };
+
+  const end = (event) => {
+    //矢印の枠を設定する
+    if (drawMode != "arrow") {
+      return false;
+    }
+    const arrow_group = d3.select("#contentBox" + count);
+    const elemCls = event.sourceEvent.target.classList[0];
+    console.log(elemCls);
+    // ハンドル上でマウスを離したとき
+    if (elemCls == "arrow-hundle") {
+      //始点と終点の矢印ハンドルを取得
+      const startArrowHundle = d3.select("#" + selectedArrowHundle);
+      const endArrowHundle = d3.select("#" + event.sourceEvent.target.id);
+      //始点と終点のグループのid名（ハンドルのid: [グループid]-[t,b,l,r（方向）])
+      const startGroupId = startArrowHundle.attr("id").split("-")[0];
+      const endGroupId = endArrowHundle.attr("id").split("-")[0];
+
+      // 同じグループ同士であれば接続しない
+      if (startGroupId == endGroupId) {
+        return;
+      } else {
+        //違うのであればハンドルを終点にして矢印を接続する
+        arrow_endX = endArrowHundle.attr("cx");
+        arrow_endY = endArrowHundle.attr("cy");
+        startArrowHundle.classed(endArrowHundle.attr("id") + "-end", true);
+        endArrowHundle.attr("fill", "blue");
+        endArrowHundle.classed(startArrowHundle.attr("id") + "-start", true);
+        arrow_group.classed(endArrowHundle.attr("id") + "-end");
+      }
+    }
+    const arrow_frame = arrow_group.select(".arrow_frame");
+    const x = Math.min(arrow_startX, arrow_endX);
+    const y = Math.min(arrow_startY, arrow_endY);
+    const width = Math.abs(arrow_endX - arrow_startX);
+    const height = Math.abs(arrow_endY - arrow_startY);
+    arrow_frame
+      .attr("x", x)
+      .attr("y", y)
+      .attr("width", width)
+      .attr("height", height)
+      .attr("opacity", 0);
+    arrowMouseEvent(arrow_group);
+    moveFlag = false;
+    groupCnt++;
+    count++;
+  };
+
+  //ドラッグイベントの登録
+  svg.call(d3.drag().on("start", start).on("drag", drag).on("end", end));
 }
+
 
 //矢印のマウスイベント登録
 function arrowMouseEvent(arrow) {
@@ -176,7 +233,6 @@ function arrowMouseEvent(arrow) {
       .attr("x", Number(arrow.select(".arrow_frame").attr("x")) + event.dx)
       .attr("y", Number(arrow.select(".arrow_frame").attr("y")) + event.dy);
   };
-
   //グループをドラッグした時の処理
   arrow.call(d3.drag().on("drag", drag));
 
@@ -186,16 +242,11 @@ function arrowMouseEvent(arrow) {
   arrow.on("dblclick", () => {
     //グループ化の枠を表示する
     frame.attr("opacity", 0.7);
-    arrow.call(
-      d3
-        .drag()
-        .on("drag", drag)
-        .on("end", () => {})
-    );
+    arrow.call(d3.drag().on("drag", drag));
   });
-
+  const svg = d3.select("#svg");
   //図形の外をクリックした際の処理
-  svg.addEventListener("click", (e) => {
+  svg.on("click", (e) => {
     frame.attr("opacity", 0);
     arrow.call(d3.drag().on("drag", null));
   });
@@ -206,29 +257,29 @@ function arrowMouseEvent(arrow) {
 //画像・文章の描画
 //テキストボックスを描画する
 function displayToTextbox(e) {
-  const svg = document.querySelector("#svg");
-  const foreignObject = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "foreignObject"
-  );
-  const r = svg.getBoundingClientRect();
+  // SVG要素の位置とサイズを取得
+  const svg = d3.select("#svg");
+  const r = svg.node().getBoundingClientRect();
+  // マウスの座標を計算
   const x = Math.round(e.clientX - r.left);
   const y = Math.round(e.clientY - r.top);
-  const div = document.createElement("div");
-  setAttributes(foreignObject, {
-    id: "contentBox" + count,
-    class: "contentBox",
-    x: x,
-    y: y,
-    width: 100,
-    height: 100,
-  });
-  div.setAttribute("contenteditable", false);
-  div.textContent = " ";
-  foreignObject.appendChild(div);
-  svg.appendChild(foreignObject);
-  const textbox = d3.select("#"+foreignObject.id);
-  textBoxMouseEvent(textbox);
+  // foreignObject要素を作成
+  const foreignObject = svg
+    .append("foreignObject")
+    .attr("id", "contentBox" + count)
+    .attr("class", "contentBox")
+    .attr("x", x)
+    .attr("y", y)
+    .attr("width", 100)
+    .attr("height", 100);
+  // div要素を作成
+  const div = foreignObject
+    .append("xhtml:div")
+    .attr("contenteditable", false)
+    .text(" ");
+  // テキストボックスのイベントを登録
+  textBoxMouseEvent(foreignObject);
+  // カウントを増やす
   count++;
 }
 
@@ -280,7 +331,7 @@ function displayToImgbox(e) {
   const x = Math.round(e.clientX - r.left);
   const y = Math.round(e.clientY - r.top);
   div.innerHTML = `<form id="form${count}">
-    <input id="input${count}" type="file" style="margin-bottom:15px;  accept="image/*"></input>
+    <input id="input${count}" type="file" style="margin-bottom:15px; name="img"  accept="image/*"></input>
     <input type="submit"></input>
   </form>`;
 
@@ -303,13 +354,12 @@ function displayToImgbox(e) {
 function uploadImg(x, y) {
   const formRef = document.querySelector(`#form${count}`);
   const inputRef = document.querySelector(`#input${count}`);
-  let dx = 0;
-  let dy = 0;
   const submitHundler = async (e) => {
     e.preventDefault();
     const file = inputRef.files[0];
     const formData = new FormData();
     formData.append("img", file);
+    console.log(formData);
     const response = await fetch("/upload", {
       method: "POST",
       body: formData,

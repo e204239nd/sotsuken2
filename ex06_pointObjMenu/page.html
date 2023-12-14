@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <svg
+      id="svg"
+      xlns="http://www.w3.org/2000/svg"
+      width="1000px"
+      height="1000px"
+    >
+      <defs>
+        <marker
+          id="m_atr"
+          markerUnits="strokeWidth"
+          markerWidth="10"
+          markerHeight="10"
+          refX="5"
+          refY="5"
+          orient="auto"
+        >
+          <polygon points="0,0 5,5 0,10 10,5 " fill="black" />
+        </marker>
+      </defs>
+
+      <!-- <g>
+      <rect class="group_frame" x="20" y="0" width="50" height="100" opcity="0" fill="white" opacity="0.7" strokeWidth="1" stroke="black"></rect>
+    <foreignObject id="contentBox0" class="contentBox" x="20" y="0" width="30" height="100">
+      <div contenteditable="true"> </div>
+      </foreignObject>
+    <foreignObject id="contentBox1" class="contentBox" x="50" y="0" width="30" height="100">
+      <div contenteditable="true"> </div>
+      </foreignObject>
+    </g> -->
+
+      <!-- 四角 -->
+      <!-- <g class="rect">
+        <rect
+          id="contentBox1"
+          class="contentBox"
+          fill="white"
+          stroke="black"
+          x="160"
+          y="400"
+          width="100"
+          height="100"
+        ></rect>
+        <circle class="lt" cx="160" cy="400" r="5" fill="black"></circle>
+        <circle class="ct" cx="210" cy="400" r="5" fill="black"></circle>
+        <circle class="rt" cx="260" cy="400" r="5" fill="black"></circle>
+        <circle class="cr" cx="260" cy="450" r="5" fill="black"></circle>
+        <circle class="lb" cx="160" cy="500" r="5" fill="black"></circle>
+        <circle class="cb" cx="210" cy="500" r="5" fill="black"></circle>
+        <circle class="rb" cx="260" cy="500" r="5" fill="black"></circle>
+        <circle class="cl" cx="160" cy="450" r="5" fill="black"></circle>
+      </g> -->
+      <!-- 円 -->
+      <!-- <g class="circle">
+        <circle
+          id="contentBox2"
+          class="contentBox"
+          fill="white"
+          stroke="black"
+          cx="210"
+          cy="450"
+          r="50"
+        ></circle>
+        <circle class="ct" cx="210" cy="400" r="5" fill="black"></circle>
+        <circle class="cr" cx="260" cy="450" r="5" fill="black"></circle>
+        <circle class="cb" cx="210" cy="500" r="5" fill="black"></circle>
+        <circle class="cl" cx="160" cy="450" r="5" fill="black"></circle>
+      </g> -->
+
+      <g
+        style="
+          touch-action: none;
+          -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        "
+        stroke="black"
+        strokeWeight="2"
+        id="groupObj0"
+        class="groupObj contentBox"
+      >
+        <rect
+          class="group_frame"
+          x="245"
+          y="130"
+          width="257"
+          height="119"
+          fill="white"
+          opacity="0.7"
+          strokeWidth="1"
+          stroke="black"
+        ></rect>
+        <circle
+          id="contentBox1"
+          class="contentBox circle"
+          fill="white"
+          stroke="black"
+          cx="452"
+          cy="199"
+          r="50"
+          style="
+            touch-action: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+          "
+        ></circle>
+        <rect
+          id="contentBox0"
+          class="contentBox"
+          fill="white"
+          stroke="black"
+          x="245"
+          y="130"
+          width="100"
+          height="100"
+          style="
+            touch-action: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+          "
+        ></rect>
+<!-- 矢印のハンドル -->
+・選択されていないときは非表示
+・それぞれのハンドルには、グループごとに「groupObj[番号]-[l,t,r,b（方向）]という法則でidを付与する
+・矢印がつながった時につながった相手のハンドルのidをクラスとして付与する
+        <circle
+id="groupObj0-l"
+         class="arrow-circle"
+         cx="373.5"
+         cy="130"
+         r="5"
+         style="fill: red"
+       ></circle>
+       <circle id="groupObj0-t"
+         class="arrow-circle"
+         cx="373.5"
+         cy="249"
+         r="5"
+         style="fill: red"
+       ></circle>
+       <circle id="groupObj0-r"
+         class="arrow-circle"
+         cx="245"
+         cy="189.5"
+         r="5"
+         style="fill: red"
+       ></circle>
+       <circle id="groupObj0-b"
+         class="arrow-circle"
+         cx="502"
+         cy="189.5"
+         r="5"
+         style="fill: red"
+       ></circle>
+      </g>
+      <g
+        style="
+          touch-action: none;
+          -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        "
+        stroke="black"
+        strokeWeight="2"
+        id="contentBox2"
+        class="groupObj contentBox"
+      >
+        <rect
+          class="arrow_frame"
+          fill="white"
+          opacity="0"
+          strokeWidth="1"
+          stroke="black"
+          x="371"
+          y="249"
+          width="2"
+          height="266"
+        ></rect>
+        <path
+          d="M 371 249 L 373 515"
+          stroke="black"
+          strokeWeight="1"
+          class="arrow"
+          marker-end="url(#m_atr)"
+        ></path>
+      </g>
+      <g
+        style="
+          touch-action: none;
+          -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        "
+        stroke="black"
+        strokeWeight="2"
+        id="groupObj2"
+        class="groupObj contentBox"
+      >
+        <rect
+          class="group_frame"
+          x="212"
+          y="513"
+          width="322"
+          height="107"
+          fill="white"
+          opacity="0.7"
+          strokeWidth="1"
+          stroke="black"
+        ></rect>
+        <rect
+          id="contentBox3"
+          class="contentBox"
+          fill="white"
+          stroke="black"
+          x="212"
+          y="513"
+          width="100"
+          height="100"
+          style="
+            touch-action: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+          "
+        ></rect>
+        <circle
+          id="contentBox4"
+          class="contentBox circle"
+          fill="white"
+          stroke="black"
+          cx="484"
+          cy="570"
+          r="50"
+          style="
+            touch-action: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+          "
+        ></circle>
+      </g>
+   
+      <!-- テキストボックスメニュー -->
+      <!-- <foreignObject id="contentBox0" class="content" x="160" y="100" width="100" height="100"><div contenteditable="true"> </div></foreignObject> -->
+
+      <!-- 画像描画メニュー -->
+      <!-- <foreignObject id="contentBox0" class="content" x="188" y="324" width="100" height="100"><div class="contentBox"><form id="form0">
+      <input id="input0" type="file" style="margin-bottom:15px;  accept=" image="" *"="">
+      <input type="submit">
+    </form></div></foreignObject> -->
+    </svg>
+  </body>
+</html>

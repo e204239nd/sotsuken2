@@ -14,9 +14,6 @@ foreignObject:first-child {
   right: auto;
 }
 
-.connect {
-  fill:"blue";
-}
 /* 
 フォームで
 textarea {
@@ -42,6 +39,9 @@ aside {
   background-color: rgb(56, 190, 211);
 }
 
+aside.view {
+  
+}
 
 /* .box {
   background-color: black;
