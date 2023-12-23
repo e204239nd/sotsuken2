@@ -243,6 +243,11 @@ function mutationOberver() {
         mutation.addedNodes.forEach((elem) => {
           if (elem.classList.contains("contentBox") == true)
             clickEventHundler(mutation.addedNodes);
+          const shape = d3.select(elem);
+          if(!shape.select(".arrow").empty()){
+            count++;
+            displayToArrow(count);
+          }
         });
       } else if (mutation.type === "childList") {
         IsClickArray = Array(IsClickArray.length).fill(0);

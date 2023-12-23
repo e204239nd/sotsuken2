@@ -1,3 +1,5 @@
+
+
 //矢印を描画する
 function displayToArrow() {
   const svg = d3.select("#svg");
@@ -43,7 +45,7 @@ function displayToArrow() {
         .append("g")
         .attr("stroke", "black")
         .attr("strokeWeight", 2)
-        .attr("id", "contentBox" + count)
+        .attr("id", arrowId)
         .attr("class", "contentBox");
 
       //矢印の始点と終点を自由に変えられるようにする
@@ -54,12 +56,12 @@ function displayToArrow() {
       // 矢印
       const arrow = arrow_group
         .append("path")
+        .attr("class", "arrow")
         .attr("d", segs)
         .attr("stroke", "black")
         .attr("strokeWeight", 1)
-        .attr("class", "arrow")
         .attr("marker-end", "url(#m_atr)");
-
+console.log(arrow);
       //ハンドルが矢印ハンドルのidを矢印のクラスに付与する
       if (selectedArrowHundle) {
         arrow_group.classed(selectedArrowHundle + "-start", true);
@@ -216,7 +218,6 @@ function displayToArrow() {
     arrowMouseEvent(arrow_group);
     moveFlag = false;
     groupCnt++;
-    count++;
   };
 
   //ドラッグイベントの登録
@@ -232,7 +233,8 @@ function arrowMouseEvent(arrow) {
     const y = seg.y + event.dy;
     const d = `M ${x} ${y} L ${seg.endX + event.dx} ${seg.endY + event.dy}`;
     arrow.select(".arrow").attr("d", d);
-    const hundles = arrow.selectAll("circle");
+    debugFunc(arrow.attr("id"));
+    const hundles = arrow.selectAll(`#${arrow.attr("id")}>circle`);
     hundles.each(function () {
       const hundle = d3.select(this);
       const x = Number(hundle.attr("cx")) + Number(event.dx);

@@ -23,7 +23,7 @@ function drawEventHundler() {
   rect_menu.addEventListener("dragend", displayToRect);
   circle_menu.addEventListener("dragstart", () => (drawMode = "circle"));
   circle_menu.addEventListener("dragend", displayToCircle);
-  displayToArrow();
+  displayToArrow(count);
   mutationOberver();
   const svg = document.querySelector("#svg");
 
