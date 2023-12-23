@@ -9,6 +9,22 @@
     <title>ホワイトボードアプリ</title>
   </head>
   <body style="background-color: skyblue;" oncontextmenu="return false">
+    <div id="modal-bg">
+      <!-- モーダルウィンドウの背景 -->
+
+<!-- モーダルウィンドウの本体 -->
+<div id="modal-main">
+<!-- モーダルウィンドウの閉じるボタン -->
+<div id="modal-close">✖</div>
+<!-- モーダルウィンドウに表示するフォーム -->
+<form id="modal-form" action="./test.php" method="post">
+<p>名前：<input type="text" name="name"></p>
+<p>メール：<input type="email" name="email"></p>
+<p><input type="submit" value="送信"></p>
+</form>
+</div>
+
+</div>
     <div id="helo">
     <!-- メニュー -->
     <aside style="background-color: white; width:50px;">
@@ -42,7 +58,7 @@
 
       </div>
     </aside>
-    
+
 
     <!--　保存読み込みボタン
        <form id="form1" style="margin:10px 0">
@@ -53,7 +69,7 @@
     </form>
 <button style="margin-top: 10px;" id="btn">図形表示</button> -->
     
-      <p style="position:absolute; margin-left:50px;" id="debug">文章を入力してください</p>      
+      <p style="position:absolute; margin-left:50px;" id="debug"></p>      
       <svg
         id="svg"
         xlns="http://www.w3.org/2000/svg"
@@ -74,47 +90,26 @@
             <polygon points="0,0 5,5 0,10 10,5 " fill="black" />
           </marker>
         </defs>
-        
-        <!-- <g>
-          <rect class="group_frame" x="20" y="0" width="50" height="100" opcity="0" fill="white" opacity="0.7" strokeWidth="1" stroke="black"></rect>
-        <foreignObject id="contentBox0" class="contentBox" x="20" y="0" width="30" height="100">
-          <div contenteditable="true"> </div>
-          </foreignObject>
-        <foreignObject id="contentBox1" class="contentBox" x="50" y="0" width="30" height="100">
-          <div contenteditable="true"> </div>
-          </foreignObject>
-        </g> -->
-        
-        <!-- テキストボックスメニュー -->
-        <!-- <foreignObject id="contentBox0" class="content" x="160" y="100" width="100" height="100"><div contenteditable="true"> </div></foreignObject> -->
+        <foreignObject width="1000" height="1000">
+        <div class="container">
+          <div class="child"></div>
+        </div>
+      </foreignObject>
 
-        <!-- 画像描画メニュー -->
-        <!-- <foreignObject id="contentBox0" class="content" x="188" y="324" width="100" height="100"><div class="contentBox"><form id="form0">
-          <input id="input0" type="file" style="margin-bottom:15px;  accept=" image="" *"="">
-          <input type="submit">
-        </form></div></foreignObject> -->
-        
       </svg>
+      
       </div>
     </div>
+    
+<!-- モーダルウィンドウを開くボタン -->
+<button id="modal-open">フォームを開く</button>
+
+<script src="js/modalWindow.js"></script>
     <script src="js/utility.js"></script>
     <script src="js/group.js"></script>
+    <script src="js/arrow.js"></script>
     <script src="js/shape.js"></script>
     <script src="js/draw.js"></script>
     <script src="js/main.js"></script>
-    <script>
-      /**
-    hamburgerアニメーションコード
-       **/
-        /* var forEach=function(t,o,r){if("[object Object]"===Object.prototype.toString.call(t))for(var c in t)Object.prototype.hasOwnProperty.call(t,c)&&o.call(r,t[c],c,t);else for(var e=0,l=t.length;l>e;e++)o.call(r,t[e],e,t)};
-        var hamburgers = document.querySelectorAll(".hamburger");
-        if (hamburgers.length > 0) {
-          forEach(hamburgers, function(hamburger) {
-            hamburger.addEventListener("click", function() {
-              this.classList.toggle("is-active");
-            }, false);
-          });
-        } */
-      </script>
   </body>
 </html>

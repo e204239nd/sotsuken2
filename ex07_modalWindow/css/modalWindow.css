@@ -1,0 +1,20 @@
+/* モーダルウィンドウのスタイル（chatGPT利用） */
+#modal-bg {
+  position: fixed; /* 要素の位置を固定 */
+  top: 0; /* 画面の上端に合わせる */
+  left: 0; /* 画面の左端に合わせる */
+  width: 100%; /* 画面の幅いっぱいに広げる */
+  height: 100%; /* 画面の高さいっぱいに広げる */
+  background-color: rgba(0, 0, 0, 0.5); /* 背景色を半透明の黒にする */
+  display: flex; /* フレックスボックスを使用 */
+  justify-content: center; /* 子要素を水平方向の中央に配置 */
+  align-items: center; /* 子要素を垂直方向の中央に配置 */
+}
+
+#modal-main {
+  width: 50%; /* モーダルウィンドウの幅を指定 */
+  height: 200px; /* モーダルウィンドウの高さを指定 */
+  background-color: white; /* モーダルウィンドウの背景色を指定 */
+  border-radius: 10px; /* モーダルウィンドウの角を丸くする */
+  padding: 20px; /* モーダルウィンドウの内側に余白をつける */
+}

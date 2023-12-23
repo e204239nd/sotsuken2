@@ -27,11 +27,12 @@ function drawEventHundler() {
   mutationOberver();
   const svg = document.querySelector("#svg");
 
-  svg.addEventListener("click", () => {
+  svg.addEventListener("click", (e) => {
     //コンテキストメニューを削除する
     // debugFunc(drawMode);
-
-    
+    if (e.target.id == "svg") {
+      d3.selectAll(".contextmenu").remove();
+    }
   });
   //クリック状態を初期化
   IsClickArray = [];

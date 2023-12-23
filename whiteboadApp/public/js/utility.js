@@ -74,12 +74,12 @@ function setFrameSize(group) {
     { x: x, y: y + height / 2, vector: "l" }, // 左
     { x: x + width, y: y + height / 2, vector: "r" }, // 右
   ];
-
-  circlePositions.forEach((pos) => {});
-
+  setArrowHundlePos(group);
   circlePositions.forEach((pos) => {
-    if (d3.select(`#${group.attr("id")}-${pos.vector}`).empty()) {
-      const arrow_circle = d3
+    //ハンドルがあれば矢印を設定する
+    const arrow_hundle = d3.select(`#${group.attr("id")}-${pos.vector}`);
+    if (arrow_hundle.empty()) {
+      const arrow_hundle = d3
         .select("#svg")
         .append("circle")
         .attr("id", group.attr("id") + "-" + pos.vector)
@@ -88,16 +88,129 @@ function setFrameSize(group) {
         .attr("cy", pos.y)
         .attr("r", circleRadius)
         .attr("fill", "red");
-      arrow_circle.on("mouseup", (event) => {
+      arrow_hundle.on("mouseup", (event) => {
         if (drawMode == "arrow") {
-          arrow_circle.classed(selectedArrowHundle + "-start", true);
-          arrow_circle.attr("fill", "blue");
+          arrow_hundle.classed(selectedArrowHundle + "-start", true);
+          arrow_hundle.attr("fill", "blue");
           moveFlag = false;
         }
       });
+      arrow_hundle.attr("cx", pos.x).attr("cy", pos.y);
     } else {
-      const arrow_circle = d3.select(`#${group.attr("id")}-${pos.vector}`);
-      arrow_circle.attr("cx", pos.x).attr("cy", pos.y);
+      arrow_hundle.attr("cx", pos.x).attr("cy", pos.y);
+      //矢印ハンドルが始点か終点かを求める
+
+      // わかったら、矢印ハンドルの位置を始点とする矢印の値を更新する
+      setArrowHundlePos(group);
+    }
+  });
+}
+let frcount = 0;
+//グループ図形に接続された矢印の位置を変更する
+function setArrowHundlePos(group) {
+  frcount++;
+  console.log(frcount);
+  const vectors = ["t", "b", "l", "r"];
+  //矢印ハンドルを取得
+  vectors.forEach((vec) => {
+    const id = group.attr("id") + "-" + vec;
+    //矢印ハンドル
+    const hundle = d3.select("#" + id);
+    //始点になっている矢印を取得
+    const startArrows = d3.selectAll(`.${id}-start`);
+    const endArrows = d3.selectAll(`.${id}-end`);
+    // console.log(arrows);
+
+    // 矢印が存在すれば
+    if (!startArrows.empty()) {
+      startArrows.each(function (p, j) {
+        const arrow = d3.select(this);
+
+        if (!arrow.select(".arrow").empty()) {
+          console.log("----------------------");
+
+          const arrowPos = getArrowPos(arrow.select(".arrow").attr("d"));
+          // 矢印の始点をハンドルの座標に設定
+          const d =
+            "M " +
+            hundle.attr("cx") +
+            " " +
+            hundle.attr("cy") +
+            " " +
+            "L " +
+            arrowPos.endX +
+            " " +
+            arrowPos.endY;
+              // ハンドルのid名と同じクラスを持つ矢印を取得
+          console.log(arrow.attr("id") + " ");
+          console.log("start:" + hundle.attr("id"));
+          console.log(
+            "変更前： M " +
+            arrowPos.x +
+            " " +
+            arrowPos.y +
+            " " +
+            "L " +
+            arrowPos.endX +
+            " " +
+            arrowPos.endY+"\n変更後： "+d);
+          arrow.select(".arrow").attr("d", d);
+          const arrow_frame = arrow.select(".arrow-frame");
+          const arrowSize = arrow.node().getBBox();
+          arrow_frame
+            .attr("x", arrowSize.x)
+            .attr("y", arrowSize.y)
+            .attr("width", arrowSize.width)
+            .attr("height", arrowSize.height);
+        
+        }
+      });
+    }
+
+    // 矢印が存在すれば
+    if (!endArrows.empty()) {
+      // 矢印の終点をハンドルの位置に変更する
+      endArrows.each(function (p, j) {
+        const arrow = d3.select(this);
+        if (!arrow.select(".arrow").empty()) {
+          console.log("----------------------");
+
+          const arrowPos = getArrowPos(d3.select(".arrow").attr("d"));
+          const d =
+            "M " +
+            arrowPos.x +
+            " " +
+            arrowPos.y +
+            " " +
+            "L " +
+            hundle.attr("cx") +
+            " " +
+            hundle.attr("cy");
+            console.log(arrow.attr("id") + ":");
+          console.log("end:" + hundle.attr("id"));
+          console.log(
+            "変更前： M " +
+            arrowPos.x +
+            " " +
+            arrowPos.y +
+            " " +
+            "L " +
+            arrowPos.endX +
+            " " +
+            arrowPos.endY+"\n変更後： "+d);
+          arrow.select(".arrow").attr("d", d);
+
+          const arrow_frame = arrow.select(".arrow-frame");
+          const arrowSize = arrow.node().getBBox();
+          arrow_frame
+            .attr("x", arrowSize.x)
+            .attr("y", arrowSize.y)
+            .attr("width", arrowSize.width)
+            .attr("height", arrowSize.height);
+          
+        }
+      });
+      // ハンドルのid名と同じクラスを持つ矢印を取得
     }
   });
 }
@@ -123,6 +236,15 @@ function clickEventHundler(contentBoxes) {
   }
 }
 
+// 矢印ハンドルのidを取得する
+function getArrowHundleId(groupId) {
+  const vecs = ["t", "b", "l", "r"];
+  const arr = [];
+  vecs.forEach((vec) => {
+    arr.push(groupId + "-" + vec);
+  });
+  return arr;
+}
 // デバッグ画面を表示
 function debugFunc(str) {
   const debugTxt = document.querySelector("#debug");

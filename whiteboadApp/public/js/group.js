@@ -2,8 +2,8 @@
 //選択図形を格納する配列
 let IsClickArray;
 let groupCnt = 0;
-
-//コンテキストメニューの表示
+let IsClickContextMenu=false;
+//グループ化用のコンテキストメニュー
 function displayContextMenu(contentBox) {
   //右クリック時の処理
   contentBox.addEventListener("contextmenu", (e) => {
@@ -26,7 +26,7 @@ function displayContextMenu(contentBox) {
     const contextMenu = document.createElement("div");
     contextMenu.innerHTML = `<a class="groupBtn"><button style="background:gray; padding:5px;">グループ化</button></a></ul>`;
     setAttributes(foreignObject, {
-      id: "contextMenu",
+      class: "contextMenu",
       x: px,
       y: py,
       width: 100,
@@ -35,8 +35,8 @@ function displayContextMenu(contentBox) {
     foreignObject.appendChild(contextMenu);
     svg.appendChild(foreignObject);
 
-    //メニューをクリックしたときの処理
-    contextMenu.addEventListener("click", (e) => {
+    //メニューのボタンをクリックしたときの処理
+    contextMenu.firstChild.addEventListener("click", (e) => {
       e.stopPropagation(); //親要素のイベントを実行しないようにする
       const group = d3
         .select("#svg")
@@ -45,7 +45,7 @@ function displayContextMenu(contentBox) {
         .attr("stroke", "black")
         .attr("strokeWeight", 2)
         .attr("id", "groupObj" + groupCnt)
-        .attr("class", "groupObj contentBox");
+        .attr("class", "groupObj");
 
       //グループを囲むフレーム（枠）の追加
       const frame = group
@@ -67,31 +67,96 @@ function displayContextMenu(contentBox) {
       }
 
       //グループ図形にマウスイベントを登録する
-      groupMouseEvent(group); 
+      groupMouseEvent(group);
 
       //コンテキストメニューを閉じる
       const removeMenu = contextMenu.parentNode;
-      svg.removeChild(removeMenu); 
+      svg.removeChild(removeMenu);
       IsClickArray = [];
       groupCnt++;
     });
   });
 }
 
+//グループ図形を右クリックしたときのコンテキストメニュー
+function groupedContextMenu(group) {
+  //コンテキストメニューの表示
+  group.node().addEventListener("contextmenu", (e) => {
+    debugFunc(!d3.select(".contextmenu").empty());
+    if(!d3.select(".contextmenu").empty()) {
+      d3.select(".contextmenu").remove();
+    }
+    const svg = document.querySelector("#svg");
+    // グループ図形の枠の大きさを取得
+    const clientRect = e.target.getBoundingClientRect();
+    // ページの左端から、要素の左端までの距離
+    const px = window.scrollX + clientRect.left / 2;
+    // ページの上端から、要素の上端までの距離
+    const py = window.scrollY + clientRect.top / 2;
+    // debugFunc(px + " " + py);
+
+    //コンテキストメニューの表示
+    const foreignObject = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "foreignObject"
+    );
+    const contextMenu = document.createElement("div");
+    const unGroupId = "unGroup";
+    const editInfoId = "editInfo";
+    contextMenu.innerHTML = `<ul>
+   <li><button id="${unGroupId}" style="background:gray; padding:5px;">グループ化解除</button></li>
+   <li><button id="${editInfoId}" style="background:gray; padding:5px;">情報の編集</button></li></ul>`;
+
+    setAttributes(foreignObject, {
+      class: "contextmenu",
+      x: px,
+      y: py,
+      width: 100,
+      height: 300,
+    });
+
+    foreignObject.appendChild(contextMenu);
+    console.log(foreignObject.children);
+    svg.appendChild(foreignObject);
+    //クリックされた時の処理
+    const unlockBtn = d3.select("#" + unGroupId);
+    unlockBtn.on("click", () => {
+      const childElems = group.selectAll(".contentBox");
+      childElems.each(function () {
+        const childElem = d3.select(this);
+        d3.select("#svg").append(() => childElem.node());
+      });
+
+      //矢印ハンドルを削除＆グループ化解除
+      const hundleIds = getArrowHundleId(group.attr("id"));
+      hundleIds.forEach((id) => d3.select("#" + id).remove());
+      group.remove();
+      foreignObject.parentNode.removeChild(foreignObject);
+    });
+
+    const editInfoBtn = d3.select("#" + editInfoId);
+    editInfoBtn.on("click", () => {
+      // モーダルウィンドウの背景を取得
+      const modalBg = document.getElementById("modal-bg");
+
+      modalBg.style.display = "flex";
+      foreignObject.parentNode.removeChild(foreignObject);
+    });
+  });
+}
 //グループ化された図形のイベント
 function groupMouseEvent(group) {
   const drag = (event) => {
     const dx = event.dx;
     const dy = event.dy;
     const elems = group.selectAll(".contentBox");
-    
-    
+    //グループに接続済みの矢印の座標を変更する
+    //-- 実際の処理 --
+
     //グループ内のそれぞれの図形に対してドラッグイベントを付与する
     elems.each(function (p, j) {
       const elem = d3.select(this);
       const cx = elem.attr("cx");
-      
-//グループが移動したときに接続された矢印の始点を合わせてずらす
 
       //矢印の移動
       if (!elem.select(".arrow_frame").empty()) {
@@ -107,17 +172,7 @@ function groupMouseEvent(group) {
         const x = seg.x + dx;
         const y = seg.y + dy;
         const d = `M ${x} ${y} L ${seg.endX + dx} ${seg.endY + dy}`;
-        // console.log(
-        //   elem.attr("id")+"\n"+
-        //   "seg:" + seg.x + " " + seg.y + " " + seg.endX + " " + seg.endY
-        // );
-        // console.log("groupMouseEvent");
-        // console.log(elem.attr("id") + ":");
-        // console.log(seg);
-        // console.log(d);
         arrow.attr("d", d);
-        // console.log(arrow.attr("d"));
-        // console.log(elem.select(".arrow_frame").empty());
         //矢印の枠の移動
       } else if (cx) {
         //円の移動
@@ -141,8 +196,7 @@ function groupMouseEvent(group) {
       .on("drag", drag)
       .on("end", () => setFrameSize(group))
   );
-
-  
+  groupedContextMenu(group);
   const frame = group.select(".group_frame");
   //ダブルクリックした時の処理
   group.on("dblclick", () => {
@@ -185,11 +239,13 @@ function mutationOberver() {
     mutationsList.forEach((mutation) => {
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
         // 子ノードの追加が検出された場合の処理
-        clickEventHundler(mutation.addedNodes);
-        console.log("子ノードの追加が検出されました");
+
+        mutation.addedNodes.forEach((elem) => {
+          if (elem.classList.contains("contentBox") == true)
+            clickEventHundler(mutation.addedNodes);
+        });
       } else if (mutation.type === "childList") {
         IsClickArray = Array(IsClickArray.length).fill(0);
-        console.log("子ノードの削除が検出されました");
       }
     });
   });
@@ -200,5 +256,3 @@ function mutationOberver() {
   // オブザーバをターゲットに適用
   observer.observe(targetNode, config);
 }
-
-

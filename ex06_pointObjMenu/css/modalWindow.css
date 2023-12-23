@@ -1,0 +1,14 @@
+.modal-bg {
+    display: flex; /* フレックスボックスを使用 */
+    justify-content: center; /* 子要素を水平方向の中央に配置 */
+    align-items: center; /* 子要素を垂直方向の中央に配置 */
+    height: 100vh; /* コンテナの高さを指定 */
+    border: 1px solid black; /* コンテナの境界線を表示 */
+  }
+
+  .modal-main {
+    background-color: gray; /* 子要素の背景色を指定 */
+    width: 10000px;
+    margin: 0 auto;
+    height: 100vh;
+  }
