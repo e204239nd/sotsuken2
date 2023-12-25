@@ -18,7 +18,10 @@ function drawEventHundler() {
   imgBox_menu.addEventListener("dragend", displayToImgbox);
   textBox_menu.addEventListener("dragstart", () => (drawMode = "textbox"));
   textBox_menu.addEventListener("dragend", displayToTextbox);
-  arrow_menu.addEventListener("click", () => (drawMode = "arrow"));
+  arrow_menu.addEventListener("click", () => {
+    drawMode = "arrow";
+    displayToArrow(count);
+  });
   rect_menu.addEventListener("dragstart", () => (drawMode = "rect"));
   rect_menu.addEventListener("dragend", displayToRect);
   circle_menu.addEventListener("dragstart", () => (drawMode = "circle"));

@@ -2,7 +2,7 @@
 //選択図形を格納する配列
 let IsClickArray;
 let groupCnt = 0;
-let IsClickContextMenu=false;
+let IsClickContextMenu = false;
 //グループ化用のコンテキストメニュー
 function displayContextMenu(contentBox) {
   //右クリック時の処理
@@ -83,7 +83,7 @@ function groupedContextMenu(group) {
   //コンテキストメニューの表示
   group.node().addEventListener("contextmenu", (e) => {
     debugFunc(!d3.select(".contextmenu").empty());
-    if(!d3.select(".contextmenu").empty()) {
+    if (!d3.select(".contextmenu").empty()) {
       d3.select(".contextmenu").remove();
     }
     const svg = document.querySelector("#svg");
@@ -144,28 +144,20 @@ function groupedContextMenu(group) {
     });
   });
 }
+
 //グループ化された図形のイベント
 function groupMouseEvent(group) {
   const drag = (event) => {
     const dx = event.dx;
     const dy = event.dy;
     const elems = group.selectAll(".contentBox");
-    //グループに接続済みの矢印の座標を変更する
-    //-- 実際の処理 --
 
     //グループ内のそれぞれの図形に対してドラッグイベントを付与する
     elems.each(function (p, j) {
       const elem = d3.select(this);
-      const cx = elem.attr("cx");
 
-      //矢印の移動
-      if (!elem.select(".arrow_frame").empty()) {
-        //枠の移動
-        const arrow_frame = elem.select(".arrow_frame");
-        arrow_frame
-          .attr("x", Number(arrow_frame.attr("x")) + dx)
-          .attr("y", Number(arrow_frame.attr("y")) + dy);
-
+       //矢印の移動
+      if (!elem.select(".arrow").empty()) {
         //矢印の移動
         const arrow = elem.select(".arrow");
         const seg = getArrowPos(elem.select(".arrow").attr("d"));
@@ -173,8 +165,10 @@ function groupMouseEvent(group) {
         const y = seg.y + dy;
         const d = `M ${x} ${y} L ${seg.endX + dx} ${seg.endY + dy}`;
         arrow.attr("d", d);
-        //矢印の枠の移動
-      } else if (cx) {
+      }
+      //図形の座標を変更する
+      const cx = elem.attr("cx");
+      if (cx) {
         //円の移動
         elem
           .attr("cx", Number(elem.attr("cx")) + dx)
@@ -197,16 +191,10 @@ function groupMouseEvent(group) {
       .on("end", () => setFrameSize(group))
   );
   groupedContextMenu(group);
-  const frame = group.select(".group_frame");
   //ダブルクリックした時の処理
   group.on("dblclick", () => {
     //グループ化の枠を表示する
-    frame.attr("opacity", 0.7);
     group.call(d3.drag().on("drag", drag));
-  });
-
-  frame.on("click", (event) => {
-    frame.attr("opacity", 0.7);
   });
 
   //図形の外をクリックした際の処理
@@ -219,6 +207,12 @@ function groupMouseEvent(group) {
   setFrameSize(group);
   clickEventHundler(group.node());
 }
+
+
+
+
+
+
 
 //要素の属性を一括で設定する
 // element:属性を指定したい要素 attributes:指定する属性と値をオブジェクト形式で指定（例：{attribute:value}）
@@ -244,7 +238,7 @@ function mutationOberver() {
           if (elem.classList.contains("contentBox") == true)
             clickEventHundler(mutation.addedNodes);
           const shape = d3.select(elem);
-          if(!shape.select(".arrow").empty()){
+          if (!shape.select(".arrow").empty()) {
             count++;
             displayToArrow(count);
           }

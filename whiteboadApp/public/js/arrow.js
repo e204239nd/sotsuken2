@@ -1,5 +1,3 @@
-
-
 //矢印を描画する
 function displayToArrow() {
   const svg = d3.select("#svg");
@@ -7,7 +5,7 @@ function displayToArrow() {
   let arrow_startX, arrow_startY;
   let arrow_endX, arrow_endY;
   //グループ化図形の矢印を接続するための変数
-  let selectedArrowHundle = "";
+  let selectedArrowHundle = null;
   //描画する矢印のid
   const arrowId = "contentBox" + count;
 
@@ -17,14 +15,14 @@ function displayToArrow() {
       arrow_startX = event.x;
       arrow_startY = event.y;
 
-      // 矢印のハンドル上でドラッグしたとき
+      // グループハンドル上でドラッグしたとき
       if (event.sourceEvent.target.classList[0] == "arrow-hundle") {
-        //ハンドルを始点に矢印を接続する
-        const arrow_hundle = d3.select("#" + event.sourceEvent.target.id);
-        selectedArrowHundle = arrow_hundle.attr("id");
-        arrow_startX = arrow_hundle.attr("cx");
-        arrow_startY = arrow_hundle.attr("cy");
-        arrow_hundle.attr("fill", "blue");
+        //グループハンドルを始点に矢印を接続する
+        const group_hundle = d3.select("#" + event.sourceEvent.target.id);
+        selectedArrowHundle = group_hundle.attr("id");
+        group_hundle.attr("fill", "blue");
+        arrow_startX = group_hundle.attr("cx");
+        arrow_startY = group_hundle.attr("cy");
       }
 
       arrow_endX = arrow_startX;
@@ -53,7 +51,7 @@ function displayToArrow() {
       // ・矢印の長さを始点と終点の位置を変更することで、変更可能にする
       // ・矢印が接続されたグループを移動する際、片方のグループの矢印ハンドルへ、矢印の始点が１箇所に集まってしまう不具合を修正する
 
-      // 矢印
+      // 矢印本体
       const arrow = arrow_group
         .append("path")
         .attr("class", "arrow")
@@ -61,11 +59,6 @@ function displayToArrow() {
         .attr("stroke", "black")
         .attr("strokeWeight", 1)
         .attr("marker-end", "url(#m_atr)");
-console.log(arrow);
-      //ハンドルが矢印ハンドルのidを矢印のクラスに付与する
-      if (selectedArrowHundle) {
-        arrow_group.classed(selectedArrowHundle + "-start", true);
-      }
       moveFlag = true;
     }
   };
@@ -106,8 +99,8 @@ console.log(arrow);
 
     // 矢印の終点
     const centerPos = {
-      x: arrow_startX + (arrow_endX - arrow_startX) / 2,
-      y: arrow_startY + (arrow_endY - arrow_startY) / 2,
+      x: Number(arrow_startX) + (Number(arrow_endX) - Number(arrow_startX)) / 2,
+      y: Number(arrow_startY) + (Number(arrow_endY) - Number(arrow_startY)) / 2,
     };
 
     // 矢印のハンドル
@@ -150,11 +143,7 @@ console.log(arrow);
         // 矢印の座標を更新する
         arrow.attr("d", `M ${startX} ${startY} L ${seg.endX} ${seg.endY}`);
         hundle_start.attr("cx", startX).attr("cy", startY);
-        const centerPos = {
-          x: Number(hundle_center.attr("x")) + (startX + Number(seg.endX)) / 2,
-          y: Number(hundle_center.attr("y")) + (startY + Number(seg.endY)) / 2,
-        };
-        hundle_center.attr("cx", centerPos.x).attr("cy", centerPos.y);
+        hundle_center.attr("cx", seg.centerPosX).attr("cy", seg.centerPosY);
       })
     );
 
@@ -172,15 +161,11 @@ console.log(arrow);
         // 矢印の座標を更新する
         arrow.attr("d", `M ${seg.x} ${seg.y} L ${endX} ${endY}`);
         hundle_end.attr("cx", endX).attr("cy", endY);
-        const centerPos = {
-          x: Number(hundle_center.attr("x")) + (Number(seg.x) + endX) / 2,
-          y: Number(hundle_center.attr("y")) + (Number(seg.y) + endY) / 2,
-        };
-        hundle_center.attr("cx", centerPos.x).attr("cy", centerPos.y);
+        hundle_center.attr("cx", seg.centerPosX).attr("cy", seg.centerPosY);
       })
     );
 
-    // ハンドル上でマウスを離したとき
+    // グループハンドル上でマウスを離したとき
     if (target.classList[0] == "arrow-hundle") {
       //始点と終点の矢印ハンドルを取得
       const startArrowHundle = d3.select("#" + selectedArrowHundle);
@@ -189,32 +174,21 @@ console.log(arrow);
       const startGroupId = startArrowHundle.attr("id").split("-")[0];
       const endGroupId = endArrowHundle.attr("id").split("-")[0];
 
-      // 同じグループ同士であれば接続しない
-      if (startGroupId == endGroupId) {
-        return;
-      } else {
-        //違うのであればハンドルを終点にして矢印を接続する
+      // 違うグループ同士であれば矢印を接続する
+      if (startGroupId != endGroupId) {
+        // 終点をグループハンドルの座標に変更する
         arrow_endX = endArrowHundle.attr("cx");
         arrow_endY = endArrowHundle.attr("cy");
-        startArrowHundle.classed(endArrowHundle.attr("id") + "-end", true);
+        // console.log(startArrowHundle.attr("id")+"\n"+endArrowHundle.attr("id"));
+        //矢印ハンドルに始点と終点を表すクラスを付与する
+        hundle_start.classed(startArrowHundle.attr("id") + "-start", true);
+        hundle_end.classed(endArrowHundle.attr("id") + "-end", true);
+        //青色に変更する
         endArrowHundle.attr("fill", "blue");
-        endArrowHundle.classed(startArrowHundle.attr("id") + "-start", true);
-        arrow_group.classed(endArrowHundle.attr("id") + "-end", true);
-      }
+      } else return;
     }
 
     //矢印のフレームの設定
-    const arrow_frame = arrow_group.select(".arrow_frame");
-    const x = Math.min(arrow_startX, arrow_endX);
-    const y = Math.min(arrow_startY, arrow_endY);
-    const width = Math.abs(arrow_endX - arrow_startX);
-    const height = Math.abs(arrow_endY - arrow_startY);
-    arrow_frame
-      .attr("x", x)
-      .attr("y", y)
-      .attr("width", width)
-      .attr("height", height)
-      .attr("opacity", 0);
     arrowMouseEvent(arrow_group);
     moveFlag = false;
     groupCnt++;
@@ -266,15 +240,3 @@ function arrowMouseEvent(arrow) {
   clickEventHundler(arrow.node()); */
 }
 
-
-
-//矢印の座標を取得する
-function getArrowPos(segs) {
-  const words = segs.split(" ");
-  const result = { x: 0, y: 0, endX: 0, endY: 0 };
-  result.x = Number(words[1]);
-  result.y = Number(words[2]);
-  result.endX = Number(words[4]);
-  result.endY = Number(words[5]);
-  return result;
-}
