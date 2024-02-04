@@ -9,20 +9,6 @@
     <title>ホワイトボードアプリ</title>
   </head>
   <body style="background-color: skyblue;" oncontextmenu="return false">
-    <div id="modal-bg">
-      <!-- モーダルウィンドウの背景 -->
-
-<!-- モーダルウィンドウの本体 -->
-<div id="modal-main">
-<!-- モーダルウィンドウの閉じるボタン -->
-<div id="modal-close">✖</div>
-<!-- モーダルウィンドウに表示するフォーム -->
-<form id="modal-form" action="./test.php" method="post">
-<p>名前：<input type="text" name="name"></p>
-<p>メール：<input type="email" name="email"></p>
-<p><input type="submit" value="送信"></p>
-</form>
-</div>
 
 </div>
     <div id="helo">
@@ -55,19 +41,8 @@
 
       <div class="box" >
         <img  id="arrow_menu" src="./image/矢印アイコン　右2.svg"  draggable="true" alt="">
-
       </div>
     </aside>
-
-
-    <!--　保存読み込みボタン
-       <form id="form1" style="margin:10px 0">
-      <input type="submit" id="update" value="保存"></input>
-    </form>
-    <form id="form2">
-      <input type="submit" id="read" value="読込み"></input>
-    </form>
-<button style="margin-top: 10px;" id="btn">図形表示</button> -->
     
       <p style="position:absolute; margin-left:50px;" id="debug"></p>      
       <svg
@@ -78,33 +53,40 @@
         
       >
         <defs>
-          <marker
-            id="m_atr"
-            markerUnits="strokeWidth"
-            markerWidth="10"
-            markerHeight="10"
-            refX="5"
-            refY="5"
-            orient="auto"
-          >
-            <polygon points="0,0 5,5 0,10 10,5 " fill="black" />
-          </marker>
-        </defs>
-        <foreignObject width="1000" height="1000">
-        <div class="container">
-          <div class="child"></div>
-        </div>
-      </foreignObject>
+      <!-- 矢印の先端 -->
+      <marker
+        id="m_atr"
+        markerUnits="strokeWidth"
+        markerWidth="20"
+        markerHeight="10"
+        refX="5"
+        refY="5"
+        orient="auto"
+      >
+      <polygon points="0,0 5,5 0,10 10,5 " fill="black" />
+      </marker>
+     </defs>
+        
 
+
+     <!-- <g stroke="black" strokeWeight="2" id="contentBox0" class="contentBox">
+      <path class="arrow" d="M 167 158 L 238 405" stroke="black" strokeWeight="1"  marker-mid="url(#m_atr_middle)" ></path></g> -->
+
+
+
+
+      <!-- SVGのマーカー利用例 -->
+  <defs>
+    <marker id="mCircle" markerWidth="10" markerHeight ="10" refX="5" refY="5">
+      <circle cx ="5" cy="5" r="5" style="fill: red; stroke:black;"></circle>
+    </marker>
+  </defs>
       </svg>
-      
+
+
       </div>
     </div>
-    
-<!-- モーダルウィンドウを開くボタン -->
-<button id="modal-open">フォームを開く</button>
 
-<script src="js/modalWindow.js"></script>
     <script src="js/utility.js"></script>
     <script src="js/group.js"></script>
     <script src="js/arrow.js"></script>

@@ -1,5 +1,4 @@
 //図形の描画を行う
-
 let count = 0;
 //描画モード切り替え用
 let drawMode = null;
@@ -17,7 +16,6 @@ function displayToRect() {
   const height = 100;
   const rect = svg
     .append("rect")
-    .attr("id", "contentBox" + count)
     .attr("class", "contentBox")
     .attr("fill", "white")
     .attr("stroke", "black")
@@ -28,7 +26,7 @@ function displayToRect() {
 
   //ドラッグ可能にする
   shapeDragEvent(rect);
-  count++;
+  ContentBoxInc("contentBox");
 }
 
 // 円の描画
@@ -37,16 +35,17 @@ function displayToCircle() {
   const r = 50;
   const circle = svg
     .append("circle")
-    .attr("id", "contentBox" + count)
-    .attr("class", "contentBox circle")
+    .attr("class", "contentBox")
     .attr("fill", "white")
     .attr("stroke", "black")
     .attr("cx", event.x)
     .attr("cy", event.y)
     .attr("r", r);
+    ContentBoxInc("contentBox");  
   //ドラッグ可能にする
   shapeDragEvent(circle);
-  count++;
+  
+  
 }
 
 
@@ -63,12 +62,15 @@ function displayToTextbox(e) {
   // foreignObject要素を作成
   const foreignObject = svg
     .append("foreignObject")
-    .attr("id", "contentBox" + count)
     .attr("class", "contentBox")
     .attr("x", x)
     .attr("y", y)
     .attr("width", 100)
     .attr("height", 100);
+// 図形のインクリメントを付け直す
+ContentBoxInc("contentBox");
+
+    
   // div要素を作成
   const div = foreignObject
     .append("xhtml:div")
@@ -76,8 +78,7 @@ function displayToTextbox(e) {
     .text(" ");
   // テキストボックスのイベントを登録
   textBoxMouseEvent(foreignObject);
-  // カウントを増やす
-  count++;
+  
 }
 
 //テキストボックスのイベント登録
@@ -129,15 +130,13 @@ function displayToImgbox(e) {
   const r = svg.getBoundingClientRect();
   const x = Math.round(e.clientX - r.left);
   const y = Math.round(e.clientY - r.top);
-  div.innerHTML = `<form id="form${count}" method="POST">
-    <input id="input${count}" type="file" style="margin-bottom:15px; name="img"  accept="image/*"></input>
+  div.innerHTML = `<form class="form" method="POST">
+    <input class="input" type="file" style="margin-bottom:15px; name="img"  accept="image/*"></input>
     <input type="submit"></input>
   </form>`;
 
-  setAttributes(div, { class: "contentBox" });
   setAttributes(foreignObject, {
-    id: "image" + count,
-    class: "image",
+    class: "image contentBox",
     x: x,
     y: y,
     width: 100,
@@ -145,15 +144,16 @@ function displayToImgbox(e) {
   });
   foreignObject.appendChild(div);
   svg.appendChild(foreignObject);
-  uploadImg(x, y);
-  count++;
+  ContentBoxInc("image");
+  uploadImg(x, y,foreignObject);
+  
 }
 
 //画像ファイルをアップロードしたときの処理
-function uploadImg(x, y) {
-  const imageForm = document.querySelector(`#image${count}`);
-  const formRef = document.querySelector(`#form${count}`);
-  const inputRef = document.querySelector(`#input${count}`);
+function uploadImg(x, y,foreignObject) {
+  const imageForm = foreignObject;
+  const formRef = foreignObject.querySelector(".form");
+  const inputRef = formRef.querySelector(".input");
   const submitHundler = async (e) => {
     e.preventDefault();
     const file = inputRef.files[0];
@@ -176,7 +176,7 @@ function uploadImg(x, y) {
     const image = d3
       .select("#svg")
       .append("image")
-      .attr("id", "contentBox" + count)
+      .attr("id", foreignObject.id)
       .attr("class", "contentBox")
       .attr("href", data.imagePath)
       .attr("x", x)

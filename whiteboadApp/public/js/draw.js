@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", drawEventHundler);
 document.addEventListener("keydown", function (e) {
   if (e.key === "Escape") {
     drawMode = "";
+    d3.selectAll(".hundle").style("opacity",0);
+    d3.selectAll(".groupObj").select(".group_frame").style("display","none");
+    
   }
 });
 
@@ -33,8 +36,10 @@ function drawEventHundler() {
   svg.addEventListener("click", (e) => {
     //コンテキストメニューを削除する
     // debugFunc(drawMode);
-    if (e.target.id == "svg") {
+    if (e.target.id == "svg"&& drawMode) {
       d3.selectAll(".contextmenu").remove();
+      const hundles = d3.selectAll(".hundle");
+      hundles.attr("opacity",0);
     }
   });
   //クリック状態を初期化

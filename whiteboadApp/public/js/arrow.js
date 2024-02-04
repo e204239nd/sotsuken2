@@ -1,13 +1,13 @@
 //矢印を描画する
 function displayToArrow() {
   const svg = d3.select("#svg");
+  const arrowId = "contentBox" + count;
   let moveFlag = false;
   let arrow_startX, arrow_startY;
   let arrow_endX, arrow_endY;
   //グループ化図形の矢印を接続するための変数
   let selectedArrowHundle = null;
   //描画する矢印のid
-  const arrowId = "contentBox" + count;
 
   //ホワイトボードをドラッグした直後の処理
   const start = (event) => {
@@ -45,12 +45,6 @@ function displayToArrow() {
         .attr("strokeWeight", 2)
         .attr("id", arrowId)
         .attr("class", "contentBox");
-
-      //矢印の始点と終点を自由に変えられるようにする
-      //　目標
-      // ・矢印の長さを始点と終点の位置を変更することで、変更可能にする
-      // ・矢印が接続されたグループを移動する際、片方のグループの矢印ハンドルへ、矢印の始点が１箇所に集まってしまう不具合を修正する
-
       // 矢印本体
       const arrow = arrow_group
         .append("path")
@@ -59,6 +53,36 @@ function displayToArrow() {
         .attr("stroke", "black")
         .attr("strokeWeight", 1)
         .attr("marker-end", "url(#m_atr)");
+
+      //矢印の始点と終点を自由に変えられるようにする
+      //　目標
+      // ・矢印の長さを始点と終点の位置を変更することで、変更可能にする
+      // ・矢印が接続されたグループを移動する際、片方のグループの矢印ハンドルへ、矢印の始点が１箇所に集まってしまう不具合を修正する
+      const hundle_start = arrow_group
+        .append("circle")
+        .attr("fill", "red")
+        .attr("class", "hundle-start hundle")
+        .attr("cx", arrow_startX)
+        .attr("cy", arrow_startY)
+        .attr("r", 5);
+
+      const hundle_center = arrow_group
+        .append("circle")
+        .attr("class", "hundle-center hundle")
+        .attr("fill", "red")
+        .attr("cx", arrow_startX)
+        .attr("cy", arrow_startY)
+        .attr("r", 5);
+
+      // 矢印の終点
+      const hundle_end = arrow_group
+        .append("circle")
+        .attr("fill", "red")
+        .attr("class", "hundle-end hundle")
+        .attr("cx", arrow_endX)
+        .attr("cy", arrow_endY)
+        .attr("r", 5);
+
       moveFlag = true;
     }
   };
@@ -103,47 +127,39 @@ function displayToArrow() {
       y: Number(arrow_startY) + (Number(arrow_endY) - Number(arrow_startY)) / 2,
     };
 
-    // 矢印のハンドル
-    const hundle_start = arrow_group
-      .append("circle")
-      .attr("fill", "red")
-      .attr("class", "hundle-start hundle")
-      .attr("cx", arrow_startX)
-      .attr("cy", arrow_startY)
-      .attr("r", 5);
-
+    // 始点のハンドル
+    const hundle_start = arrow_group.select(".hundle-start");
+    // 中心点のハンドル
     const hundle_center = arrow_group
-      .append("circle")
-      .attr("class", "hundle-center hundle")
-      .attr("fill", "red")
+      .select(".hundle-center")
       .attr("cx", centerPos.x)
-      .attr("cy", centerPos.y)
-      .attr("r", 5);
+      .attr("cy", centerPos.y);
 
     // 矢印の終点
     const hundle_end = arrow_group
-      .append("circle")
-      .attr("fill", "red")
-      .attr("class", "hundle-end hundle")
+      .select(".hundle-end")
       .attr("cx", arrow_endX)
-      .attr("cy", arrow_endY)
-      .attr("r", 5);
+      .attr("cy", arrow_endY);
 
     // 始点の座標の変更
     hundle_start.call(
       d3.drag().on("drag", (event) => {
-        //現時点の矢印の始点と終点の座標
-        //更新する終点の座標
+        //始点の座標
         const startX = Number(hundle_start.attr("cx")) + Number(event.dx);
         const startY = Number(hundle_start.attr("cy")) + Number(event.dy);
-
         //グループの中の矢印とその座標を取得
         const arrow = arrow_group.select(".arrow");
-        const seg = getArrowPos(arrow.attr("d"));
         // 矢印の座標を更新する
-        arrow.attr("d", `M ${startX} ${startY} L ${seg.endX} ${seg.endY}`);
+        arrow.attr(
+          "d",
+          `M ${startX} ${startY} L ${hundle_end.attr("cx")} ${hundle_end.attr(
+            "cy"
+          )}`
+        );
         hundle_start.attr("cx", startX).attr("cy", startY);
-        hundle_center.attr("cx", seg.centerPosX).attr("cy", seg.centerPosY);
+        hundle_center
+          .attr("cx", (startX + Number(hundle_end.attr("cx"))) / 2)
+          .attr("cy", (startY + Number(hundle_end.attr("cy"))) / 2);
       })
     );
 
@@ -157,11 +173,17 @@ function displayToArrow() {
 
         //グループの中の矢印とその座標を取得
         const arrow = arrow_group.select(".arrow");
-        const seg = getArrowPos(arrow.attr("d"));
         // 矢印の座標を更新する
-        arrow.attr("d", `M ${seg.x} ${seg.y} L ${endX} ${endY}`);
+        arrow.attr(
+          "d",
+          `M ${hundle_start.attr("cx")} ${hundle_start.attr(
+            "cy"
+          )} L ${endX} ${endY}`
+        );
         hundle_end.attr("cx", endX).attr("cy", endY);
-        hundle_center.attr("cx", seg.centerPosX).attr("cy", seg.centerPosY);
+        hundle_center
+          .attr("cx", (Number(hundle_start.attr("cx")) + endX) / 2)
+          .attr("cy", (Number(hundle_start.attr("cy")) + endY) / 2);
       })
     );
 
@@ -171,7 +193,6 @@ function displayToArrow() {
       const startArrowHundle = d3.select("#" + selectedArrowHundle);
       const endArrowHundle = d3.select("#" + target.id);
       //始点と終点のグループのid名（ハンドルのid: [グループid]-[t,b,l,r（方向）])
-      const startGroupId = startArrowHundle.attr("id").split("-")[0];
       const endGroupId = endArrowHundle.attr("id").split("-")[0];
 
       // 違うグループ同士であれば矢印を接続する
@@ -179,11 +200,10 @@ function displayToArrow() {
         // 終点をグループハンドルの座標に変更する
         arrow_endX = endArrowHundle.attr("cx");
         arrow_endY = endArrowHundle.attr("cy");
-        // console.log(startArrowHundle.attr("id")+"\n"+endArrowHundle.attr("id"));
+
         //矢印ハンドルに始点と終点を表すクラスを付与する
-        hundle_start.classed(startArrowHundle.attr("id") + "-start", true);
         hundle_end.classed(endArrowHundle.attr("id") + "-end", true);
-        //青色に変更する
+        //グループハンドルを青色に変更する
         endArrowHundle.attr("fill", "blue");
       } else return;
     }
@@ -191,7 +211,6 @@ function displayToArrow() {
     //矢印のフレームの設定
     arrowMouseEvent(arrow_group);
     moveFlag = false;
-    groupCnt++;
   };
 
   //ドラッグイベントの登録
@@ -227,16 +246,4 @@ function arrowMouseEvent(arrow) {
     frame.attr("opacity", 0.7);
     arrow.call(d3.drag().on("drag", drag));
   });
-
-  /* const svg = d3.select("#svg");
-  //図形の外をクリックした際の処理
-  svg.on("click", (e) => {
-    //矢印の枠
-    const frame = arrow.select(".arrow_frame");
-    frame.attr("opacity", 0);
-    arrow.call(d3.drag().on("drag", null));
-  });
-
-  clickEventHundler(arrow.node()); */
 }
-

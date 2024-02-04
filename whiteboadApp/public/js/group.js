@@ -3,40 +3,36 @@
 let IsClickArray;
 let groupCnt = 0;
 let IsClickContextMenu = false;
+
 //グループ化用のコンテキストメニュー
 function displayContextMenu(contentBox) {
   //右クリック時の処理
   contentBox.addEventListener("contextmenu", (e) => {
-    if (IsClickArray.length <= 1) return;
+    if (IsClickContextMenu == false && IsClickArray.length <= 1) return;
     // グループ図形の枠の大きさを取得
     const clientRect = contentBox.getBoundingClientRect();
 
     // ページの左端から、要素の左端までの距離
     const px = window.scrollX + clientRect.left / 2;
-
     // ページの上端から、要素の上端までの距離
     const py = window.scrollY + clientRect.top / 2;
-    const svg = document.querySelector("#svg");
-    const foreignObject = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "foreignObject"
-    );
-
-    //コンテキストメニューの表示
-    const contextMenu = document.createElement("div");
-    contextMenu.innerHTML = `<a class="groupBtn"><button style="background:gray; padding:5px;">グループ化</button></a></ul>`;
-    setAttributes(foreignObject, {
-      class: "contextMenu",
-      x: px,
-      y: py,
-      width: 100,
-      height: 100,
-    });
-    foreignObject.appendChild(contextMenu);
-    svg.appendChild(foreignObject);
+    const svg = d3.select("#svg");
+    const foreignObject = svg
+      .append("foreignObject")
+      .attr("class", "contextMenu")
+      .attr("x", px)
+      .attr("y", py)
+      .attr("width", 100)
+      .attr("height", 100);
+    // foreignObject内にHTML要素を追加
+    const contextMenu = foreignObject
+      .append("xhtml:div")
+      .html(
+        `<a class="groupBtn"><button style="background:gray; padding:5px;">グループ化</button></a>`
+      );
 
     //メニューのボタンをクリックしたときの処理
-    contextMenu.firstChild.addEventListener("click", (e) => {
+    contextMenu.select(".groupBtn").on("click", (e) => {
       e.stopPropagation(); //親要素のイベントを実行しないようにする
       const group = d3
         .select("#svg")
@@ -66,87 +62,21 @@ function displayContextMenu(contentBox) {
         group.append(() => clickedElem.node());
       }
 
+      // グループの枠の大きさを設定する
+      setFrameSize(group);
       //グループ図形にマウスイベントを登録する
-      groupMouseEvent(group);
+      groupDragEvent(group);
 
       //コンテキストメニューを閉じる
-      const removeMenu = contextMenu.parentNode;
-      svg.removeChild(removeMenu);
+      svg.select(".contextMenu").remove();
       IsClickArray = [];
       groupCnt++;
     });
   });
 }
 
-//グループ図形を右クリックしたときのコンテキストメニュー
-function groupedContextMenu(group) {
-  //コンテキストメニューの表示
-  group.node().addEventListener("contextmenu", (e) => {
-    debugFunc(!d3.select(".contextmenu").empty());
-    if (!d3.select(".contextmenu").empty()) {
-      d3.select(".contextmenu").remove();
-    }
-    const svg = document.querySelector("#svg");
-    // グループ図形の枠の大きさを取得
-    const clientRect = e.target.getBoundingClientRect();
-    // ページの左端から、要素の左端までの距離
-    const px = window.scrollX + clientRect.left / 2;
-    // ページの上端から、要素の上端までの距離
-    const py = window.scrollY + clientRect.top / 2;
-    // debugFunc(px + " " + py);
-
-    //コンテキストメニューの表示
-    const foreignObject = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "foreignObject"
-    );
-    const contextMenu = document.createElement("div");
-    const unGroupId = "unGroup";
-    const editInfoId = "editInfo";
-    contextMenu.innerHTML = `<ul>
-   <li><button id="${unGroupId}" style="background:gray; padding:5px;">グループ化解除</button></li>
-   <li><button id="${editInfoId}" style="background:gray; padding:5px;">情報の編集</button></li></ul>`;
-
-    setAttributes(foreignObject, {
-      class: "contextmenu",
-      x: px,
-      y: py,
-      width: 100,
-      height: 300,
-    });
-
-    foreignObject.appendChild(contextMenu);
-    console.log(foreignObject.children);
-    svg.appendChild(foreignObject);
-    //クリックされた時の処理
-    const unlockBtn = d3.select("#" + unGroupId);
-    unlockBtn.on("click", () => {
-      const childElems = group.selectAll(".contentBox");
-      childElems.each(function () {
-        const childElem = d3.select(this);
-        d3.select("#svg").append(() => childElem.node());
-      });
-
-      //矢印ハンドルを削除＆グループ化解除
-      const hundleIds = getArrowHundleId(group.attr("id"));
-      hundleIds.forEach((id) => d3.select("#" + id).remove());
-      group.remove();
-      foreignObject.parentNode.removeChild(foreignObject);
-    });
-
-    const editInfoBtn = d3.select("#" + editInfoId);
-    editInfoBtn.on("click", () => {
-      // モーダルウィンドウの背景を取得
-      const modalBg = document.getElementById("modal-bg");
-
-      modalBg.style.display = "flex";
-      foreignObject.parentNode.removeChild(foreignObject);
-    });
-  });
-}
-
-//グループ化された図形のイベント
-function groupMouseEvent(group) {
+//グループ図形を移動した際の処理
+function groupDragEvent(group) {
   const drag = (event) => {
     const dx = event.dx;
     const dy = event.dy;
@@ -156,7 +86,7 @@ function groupMouseEvent(group) {
     elems.each(function (p, j) {
       const elem = d3.select(this);
 
-       //矢印の移動
+      //矢印の移動
       if (!elem.select(".arrow").empty()) {
         //矢印の移動
         const arrow = elem.select(".arrow");
@@ -190,29 +120,70 @@ function groupMouseEvent(group) {
       .on("drag", drag)
       .on("end", () => setFrameSize(group))
   );
-  groupedContextMenu(group);
+
   //ダブルクリックした時の処理
   group.on("dblclick", () => {
     //グループ化の枠を表示する
     group.call(d3.drag().on("drag", drag));
   });
-
-  //図形の外をクリックした際の処理
-  svg.addEventListener("click", (e) => {
+  document.querySelector("#svg").addEventListener("click", (e) => {
     if (e.target.id == "svg") {
-      frame.attr("opacity", 0);
       group.call(d3.drag().on("drag", null));
     }
   });
-  setFrameSize(group);
-  clickEventHundler(group.node());
+  //グループ選択図形を追加する処理
+  addGroupEvent(group.node());
+  groupedContextMenu(group);
 }
 
+//グループ図形を右クリックしたときのコンテキストメニュー
+function groupedContextMenu(group) {
+  //コンテキストメニューの表示
+  group.node().addEventListener("contextmenu", (e) => {
+    if (!d3.select(".contextmenu").empty()) {
+      d3.select(".contextmenu").remove();
+    }
+    const svg = d3.select("#svg");
+    // グループ図形の枠の大きさを取得
+    const clientRect = e.target.getBoundingClientRect();
+    // ページの左端から、要素の左端までの距離
+    const px = window.scrollX + clientRect.left / 2;
+    // ページの上端から、要素の上端までの距離
+    const py = window.scrollY + clientRect.top / 2;
 
+    const foreignObject = svg
+      .append("foreignObject")
+      .attr("class", "contextMenu")
+      .attr("x", px)
+      .attr("y", py)
+      .attr("width", 100)
+      .attr("height", 100);
+      
+      const unGroupId="unGroup";//グループ解除ボタン
+    // foreignObject内にHTML要素を追加
+    const contextMenu = foreignObject.append("xhtml:div").html(
+      `<ul>
+      <li><button id="${unGroupId}" style="background:gray; padding:5px;">グループ化解除</button></li></ul>`
+    );
 
+    //グループ化解除のボタンがクリックされた時の処理
+    const unGroupBtn = d3.select("#unGroup");
+    unGroupBtn.on("click", () => {
+      const childElems = group.selectAll(".contentBox");
+      childElems.each(function () {
+        const childElem = d3.select(this);
+        d3.select("#svg").append(() => childElem.node());
+      });
 
-
-
+      //矢印ハンドルを削除
+      const hundleIds = getArrowHundleId(group.attr("id"));
+      hundleIds.forEach((id) => d3.select("#" + id).remove());
+      //グループ図形を削除
+      group.remove();
+      foreignObject.remove();
+    });
+  });
+}
 
 //要素の属性を一括で設定する
 // element:属性を指定したい要素 attributes:指定する属性と値をオブジェクト形式で指定（例：{attribute:value}）
@@ -233,10 +204,9 @@ function mutationOberver() {
     mutationsList.forEach((mutation) => {
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
         // 子ノードの追加が検出された場合の処理
-
         mutation.addedNodes.forEach((elem) => {
           if (elem.classList.contains("contentBox") == true)
-            clickEventHundler(mutation.addedNodes);
+            addGroupEvent(mutation.addedNodes);
           const shape = d3.select(elem);
           if (!shape.select(".arrow").empty()) {
             count++;
@@ -244,7 +214,7 @@ function mutationOberver() {
           }
         });
       } else if (mutation.type === "childList") {
-        IsClickArray = Array(IsClickArray.length).fill(0);
+        IsClickArray = [];
       }
     });
   });
@@ -254,4 +224,21 @@ function mutationOberver() {
 
   // オブザーバをターゲットに適用
   observer.observe(targetNode, config);
+}
+
+// 図形クリック時の処理
+function addGroupEvent(contentBoxes) {
+  for (let i = 0; i < contentBoxes.length; i++) {
+    const contentBox = d3.select("#" + contentBoxes[i].id);
+    contentBox.on("click", (e) => {
+      //シフトキーを押していて、isclickArrayに図形のidが含まれていなければ
+      const id = contentBox.attr("id");
+      if (e.shiftKey && !IsClickArray.includes(id)) {
+        // 図形のidをisClickArrayに追加する
+        IsClickArray.push(id);
+      }
+    });
+    //コンテキストメニューの表示
+    displayContextMenu(contentBox.node());
+  }
 }

@@ -8,6 +8,95 @@
     <svg width="1000" height="400" id="svg"></svg>
     <p id="debug"></p>
     <script>
+      <!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js"></script>
+    <title>ホワイトボードの保存</title>
+  </head>
+  <body>
+    
+    <!-- メニュー -->
+    <div
+      class="menu"
+      style="
+        padding-top: 100px;
+        padding-left: 100px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0);
+      "
+    >
+    
+    <div  id="arrowBtn">
+      <svg version="1.1" width="64" height="64" stroke="black">
+        <defs>
+          <marker
+            id="m_atr"
+            markerUnits="strokeWidth"
+            markerWidth="10"
+            markerHeight="10"
+            refX="5"
+            refY="5"
+            orient="auto"
+          >
+            <polygon points="0,0 5,5 0,10 10,5 " fill="black" />
+          </marker>
+          
+        </defs>
+      </svg>
+    </div>
+    </div>
+    
+
+    <div id="helo" style="background-color: aqua; margin-top: 100px;">
+      <svg
+        id="svg-container"
+        xlns="http://www.w3.org/2000/svg"
+        width="1000px"
+        height="1000px"
+      >  <defs>
+        <marker
+          id="m_atr"
+          markerUnits="strokeWidth"
+          markerWidth="10"
+          markerHeight="10"
+          refX="5"
+          refY="5"
+        >
+          <polygon points="0,0 5,5 0,10 10,5 " fill="black" />
+        </marker>
+      </defs></svg>
+  <!--   <div style="bottom: 0px; position: absolute;" >
+      <p id="debug" style="background:aliceblue"></p>
+      <p>ホワイトボードに矢印を表示するプログラム<br>
+      <ul>
+        <li>マウスを押すと線が表示される</li>
+        <li>ドラッグ中に線の終点座標を変更することで線を引く</li>
+        <li>ドロップ時に先端が矢印に変更される</li>
+      </ul>  
+      </p>
+      </div>
+    </div> -->
+    <script>
+      
+    </script>
+      <script src="js/arrow.js"></script>
+    <script src="js/draw.js"></script>
+    <script src="js/main.js"></script>
+    
+  </body>
+</html>
+
+    </script>
+    <script>
+
+      
       // Snap.svgのインスタンスを作成
       var s = Snap("#svg");
 

@@ -19,6 +19,39 @@ let tmpX, tmpY;
 function arrow() {
   let mode = "arrow";
   const svg = document.querySelector("#svg-container");
+  // Snap.svgのオブジェクトを作成
+var s = Snap(400, 300);
+
+// SVG要素を追加
+var svg = s.paper;
+
+// marker要素を作成
+var marker = svg.marker(0, 0, 10, 10, 5, 5);
+
+// marker要素に矢印の形を追加
+marker.path("M0,0 L10,5 L0,10 z").attr({
+  fill: "red"
+});
+
+// marker要素に属性を設定
+marker.attr({
+  markerUnits: "strokeWidth"
+});
+
+// パス要素を作成
+var path = svg.path("M50,50 Q100,150 150,50 T250,50");
+
+// パス要素に属性を設定
+path.attr({
+  fill: "none",
+  stroke: "black",
+  strokeWidth: 5,
+  // パスの始点にマーカーを描画
+  markerStart: marker,
+  // パスの終点にマーカーを描画
+  markerEnd: marker
+});
+
   let segs = [];
   let px, py;
   let arrow;
@@ -86,9 +119,11 @@ function arrow() {
     paper.mousemove(function (e) {
       if (moveFlag) {
         var d = "M " + tmpX + " " + tmpY + " L " + e.offsetX + " " + e.offsetY;
-        arrow.attr({ d: d });
+        arrow.attr({ d: d,"marker-end": "url(#m_atr)" });
         const arrowElem = document.querySelector("#arrow");
-        arrowElem.setAttribute("marker-end", "url(#m_atr)");
+      
+        // console.log(arrow.attr("marker-end"));
+        // console.log(arrow.attr("d"));
       }
       // debugFunc("マウスムーブ");
     });

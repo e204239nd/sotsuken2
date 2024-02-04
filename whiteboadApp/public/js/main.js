@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!whiteboadId) {
     localStorage.setItem("whiteboad_id", "");
   }
-  modalWindow();
 });
 
 /* const form1 = document.getElementById("form1");

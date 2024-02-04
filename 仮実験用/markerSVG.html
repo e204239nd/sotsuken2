@@ -1,0 +1,46 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+    <!-- マーカーの定義 -->
+    <defs>
+      <!-- 開始点のマーカー -->
+      <marker
+        id="start-marker"
+        markerUnits="strokeWidth"
+        markerWidth="8"
+        markerHeight="8"
+        refX="4"
+        refY="4"
+        orient="auto"
+      >
+        <polygon points="0,0 0,8 8,4" fill="blue" />
+      </marker>
+  
+      <!-- 中間点のマーカー -->
+      <marker id="mid-marker" markerUnits="strokeWidth" markerWidth="3" markerHeight="3" viewBox="0 0 10 10" refX="5" refY="5">
+        <polygon points="0,0 5,5 0,10 10,5 " fill="red"/>
+    </marker>
+  
+      <!-- 終了点のマーカー -->
+      <marker
+        id="end-marker"
+        markerUnits="strokeWidth"
+        markerWidth="8"
+        markerHeight="8"
+        refX="4"
+        refY="4"
+        orient="auto"
+      >
+        <polygon points="0,0 8,4 0,8" fill="green" />
+      </marker>
+    </defs>
+  
+    <!-- パス要素でマーカーを使用 -->
+    <path
+      d="M 50 50 L 150 50"
+      stroke="black"
+      stroke-width="2"
+      marker-start="url(#start-marker)"
+      marker-mid="url(#mid-marker)"
+      marker-end="url(#end-marker)"
+    />
+  </svg>
+  

@@ -67,6 +67,8 @@ function setFrameSize(group) {
   const width = maxX - minX;
   const height = maxY - minY;
   frame.attr("x", x).attr("y", y).attr("width", width).attr("height", height);
+
+  //グループハンドルの円の大きさ
   const circleRadius = 5;
   const circlePositions = [
     { x: x + width / 2, y: y, vector: "t" }, // 上
@@ -74,12 +76,15 @@ function setFrameSize(group) {
     { x: x, y: y + height / 2, vector: "l" }, // 左
     { x: x + width, y: y + height / 2, vector: "r" }, // 右
   ];
-
-  circlePositions.forEach((pos) => {
-    const group_hundle = d3.select(`#${group.attr("id")}-${pos.vector}`);
-    //ハンドルがあれば矢印を設定する
-    if (group_hundle.empty()) {
-      const group_hundle = d3
+  const group_hundle = d3.select(
+    `#${group.attr("id")}-${circlePositions[0].vector}`
+  );
+  console.log(!group_hundle.empty());
+  //グループハンドルの設定
+  if (group_hundle.empty()) {
+    //グループハンドルがなければ描画する
+    circlePositions.forEach((pos) => {
+      const hundle = d3
         .select("#svg")
         .append("circle")
         .attr("id", group.attr("id") + "-" + pos.vector)
@@ -89,19 +94,23 @@ function setFrameSize(group) {
         .attr("r", circleRadius)
         .attr("fill", "red");
 
-      group_hundle.on("mouseup", (event) => {
+      hundle.on("mouseup", (event) => {
         if (drawMode == "arrow") {
-          group_hundle.classed(selectedArrowHundle + "-start", true);
-          group_hundle.attr("fill", "blue");
+          hundle.classed(selectedArrowHundle + "-start", true);
+          hundle.attr("fill", "blue");
           moveFlag = false;
         }
       });
-      group_hundle.attr("cx", pos.x).attr("cy", pos.y);
-    } else {
-      group_hundle.attr("cx", pos.x).attr("cy", pos.y);
-      setArrowHundlePos(group);
-    }
-  });
+      hundle.attr("cx", pos.x).attr("cy", pos.y);
+    });
+  } else {
+    //既存のグループハンドルの座標を変更する
+    circlePositions.forEach((pos) => {
+      const hundle = d3.select(`#${group.attr("id")}-${pos.vector}`);
+      hundle.attr("cx", pos.x).attr("cy", pos.y);
+    });
+    setArrowHundlePos(group);
+  }
 }
 
 //グループ図形に接続された矢印の位置を変更する
@@ -115,7 +124,8 @@ function setArrowHundlePos(group) {
     //始点になっている矢印を取得
     const startArrowHundles = d3.selectAll(`.${id}-start`);
     const endArrowHundles = d3.selectAll(`.${id}-end`);
-
+console.log(startArrowHundles);
+console.log(endArrowHundles);
     // 始点に矢印がつながっていれば
     if (!startArrowHundles.empty()) {
       startArrowHundles.each(function (p, j) {
@@ -137,8 +147,8 @@ function setArrowHundlePos(group) {
         arrow.attr("d", d);
         arrow_group
           .select(".hundle-center")
-          .attr("cx", arrowPos.centerPosX)
-          .attr("cy", arrowPos.centerPosY);
+          .attr("cx", arrowPos.midPosX)
+          .attr("cy", arrowPos.midPosY);
       });
     }
 
@@ -162,8 +172,8 @@ function setArrowHundlePos(group) {
         arrow.attr("d", d);
         arrow_group
           .select(".hundle-center")
-          .attr("cx", arrowPos.centerPosX)
-          .attr("cy", arrowPos.centerPosY);
+          .attr("cx", arrowPos.midPosX)
+          .attr("cy", arrowPos.midPosY);
       });
       // ハンドルのid名と同じクラスを持つ矢印を取得
     }
@@ -193,9 +203,9 @@ function updateArrowHundle(group) {
       arrow.attr("d", d);
       arrowHundle.attr("cx", seg.x).attr("cy", seg.y);
       arrow_group
-        .select("hundle-center")
-        .attr("cx", seg.centerPosX)
-        .attr("cy", seg.centerPosY);
+        .select("hundle-mid")
+        .attr("cx", seg.midPosX)
+        .attr("cy", seg.midPosY);
     });
   }
 
@@ -214,37 +224,17 @@ function updateArrowHundle(group) {
     });
   }
 }
-// 図形クリック時の処理
-function clickEventHundler(contentBoxes) {
-  for (let i = 0; i < contentBoxes.length; i++) {
-    const contentBox = d3.select("#" + contentBoxes[i].id);
-    contentBox.on("click", (e) => {
-      //シフトキーを押していて、isclickArrayに図形のidが含まれていなければ
-      const id = contentBox.attr("id");
-      if (e.shiftKey && !IsClickArray.includes(id)) {
-        if (contentBox.select(".arrow_frame").empty()) {
-          const arrow_frame = contentBox.select(".arrow_frame");
-          arrow_frame.attr("opacity", 0.7);
-        }
-        // 図形のidをisClickArrayに追加する
-        IsClickArray.push(id);
-      }
-    });
-    //コンテキストメニューの表示
-    displayContextMenu(contentBox.node());
-  }
-}
 
 //矢印の座標を取得する
 function getArrowPos(segs) {
   const words = segs.split(" ");
-  const result = { x: 0, y: 0, endX: 0, endY: 0, centerPosX: 0, centerPosY: 0 };
+  const result = { x: 0, y: 0, endX: 0, endY: 0, midPosX: 0, midPosY: 0 };
   result.x = Number(words[1]);
   result.y = Number(words[2]);
   result.endX = Number(words[4]);
   result.endY = Number(words[5]);
-  result.centerPosX = result.x + (result.endX - result.x) / 2;
-  result.centerPosY = result.y + (result.endY - result.y) / 2;
+  result.midPosX = result.x + (result.endX - result.x) / 2;
+  result.midPosY = result.y + (result.endY - result.y) / 2;
   return result;
 }
 
@@ -257,8 +247,21 @@ function getArrowHundleId(groupId) {
   });
   return arr;
 }
+
 // デバッグ画面を表示
 function debugFunc(str) {
   const debugTxt = document.querySelector("#debug");
   debugTxt.textContent = str;
+}
+
+//SVG図形に対して動的なidをつける
+function ContentBoxInc(idName) {
+  //複数のdiv要素に動的なidをつける
+
+  var tmp = document.querySelectorAll("."+idName);
+  for (var i = 0; i <= tmp.length - 1; i++) {
+    //id追加
+    tmp[i].setAttribute("id", idName + i);
+  }
+  
 }
